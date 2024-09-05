@@ -141,7 +141,7 @@ public class TransJSON implements Trans{
         for (JsonNode obj : jsonArray) {
             for (String header : headers) {
                 String value = obj.has(header) ? obj.get(header).asText() : "";
-                sb.append(format(value));
+                sb.append(Trans.super.format(value));
             }
             sb.deleteCharAt(sb.length() - 1).append('\n');
         }
