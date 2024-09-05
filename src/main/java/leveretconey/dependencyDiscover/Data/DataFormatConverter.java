@@ -14,7 +14,7 @@ import leveretconey.util.Util;
 public class DataFormatConverter {
 
     private static final Type[] supportedTypes=new Type[]
-            {new TypeNull(),new TypeLong(),new TypeDouble(),new TypeString()};
+            {new TypeNull(),new TypeLong(),new TypeDouble(),new TypeDate(),new TypeString()};
 
     private static class DataFrame{
         //和另一个dataframe唯一的区别在于，这个是列优先的,用作数据的预处理
