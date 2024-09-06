@@ -40,6 +40,10 @@ dependencies {
         modules = [ 'javafx.controls', 'javafx.base','javafx.fxml']
     }
 
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+
+
 
 
     //Test
