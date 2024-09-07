@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import javafx.util.Pair;
 import leveretconey.util.Util;
 
 public class DataFrame {
     protected List<List<Integer>> data=new ArrayList<List<Integer>>();
     private List<String> columnNames =new ArrayList<>();
+    public static List<Pair<Integer,Boolean>> cons = new ArrayList<>();
 
 
     public DataFrame() {
@@ -57,20 +59,30 @@ public class DataFrame {
             String[] parts=line.split(",");
             result.columnNames =Arrays.asList(parts);
 
-            System.out.println(lines.length);
+            cons = new ArrayList<>(Collections.nCopies(result.columnNames.size(),null));
+            int j = 0;
+
             //data
             for(int i = 1;i<lines.length;i++){
                 line=lines[i];
                 List<Integer> list=new ArrayList<>();
                 parts=line.split(",");
+                j = 0;
                 for (String part : parts) {
-                    list.add(Integer.parseInt(part));
+                    int val = Integer.parseInt(part);
+                    list.add(val);
+
+                    if(cons.get(j) == null){
+                        cons.set(j,new Pair<>(val, true));
+                    } else if (cons.get(j).getKey() != val) {
+                        cons.set(j,new Pair<>(val,false));
+                    }
+                    j++;
                 }
                 if (list.size()!=result.getColumnCount()){
                     throw new RuntimeException(String.format
                             ("column count not fixed:expected: %d, actual:%d",result.getColumnCount(),list.size()));
                 }
-
                 result.data.add(list);
             }
             return result;

@@ -3,6 +3,8 @@ package leveretconey.cocoa.multipleStandard;
 import java.security.InvalidParameterException;
 import java.util.*;
 
+import javafx.util.Pair;
+import leveretconey.dependencyDiscover.Predicate.Operator;
 import leveretconey.util.ReturnData;
 import leveretconey.cocoa.sample.DFSISPCacheAttachedToNode;
 import leveretconey.cocoa.sample.ValidatorForG1UsingISPCache;
@@ -103,6 +105,20 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
         }
 
         Collection<LexicographicalOrderDependency> result = tree.getValidODs();
+
+        if (result.isEmpty()) {
+            LexicographicalOrderDependency lod = new LexicographicalOrderDependency();
+
+            for (int i = 0; i < data.cons.size(); i++) {
+                if (data.cons.get(i).getValue()) {
+                    lod.right.add(new SingleAttributePredicate(i, Operator.lessEqual));
+
+                }
+            }
+            result.add(lod);
+        }
+
+
         /**
          * 索引是DFSDiscovererWithMultipleStandard的112-113行把后面两个参数删掉
          */

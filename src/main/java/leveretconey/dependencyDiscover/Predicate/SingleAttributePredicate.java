@@ -23,7 +23,7 @@ public class SingleAttributePredicate implements AbstractPredicate{
         return cache.get(attribute).get(operator.toInt());
     }
 
-    private SingleAttributePredicate(int attribute, Operator operator) {
+    public SingleAttributePredicate(int attribute, Operator operator) {
         this.attribute = attribute;
         this.operator = operator;
     }
