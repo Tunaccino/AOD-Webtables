@@ -14,9 +14,7 @@ public class TypeString extends AbstractType{
     }
 
     @Override
-    public String parse(String s) {
-        return s;
-    }
+    public String parse(String s) {return (s.equals("")) ? null : s;}
 
     @Override
     public Comparator<String> getComparator() {return String::compareTo;}

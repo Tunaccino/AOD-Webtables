@@ -11,7 +11,7 @@ public class TypeLong extends AbstractType{
     @Override
     public Long parse(String s) {
         if ("".equals(s))
-            return Long.MIN_VALUE;
+            return null;
         try {
             return Long.parseLong(s);
         }catch (Exception e){

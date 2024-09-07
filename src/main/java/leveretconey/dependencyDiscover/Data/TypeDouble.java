@@ -12,7 +12,7 @@ public class TypeDouble extends AbstractType{
     @Override
     public Double parse(String s) {
         if(s.equals(""))
-            return Double.NEGATIVE_INFINITY;
+            return null;
         return Double.parseDouble(s);
     }
 

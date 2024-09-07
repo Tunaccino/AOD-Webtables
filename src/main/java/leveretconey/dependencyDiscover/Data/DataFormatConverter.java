@@ -357,18 +357,30 @@ public class DataFormatConverter {
         int length=objects.length;
         Integer[] convertedIntegers=new Integer[length];
         Pair<Integer,Object>[] indexObjectPairs=new Pair[length];
+
+        ArrayList<Integer> nulls = new ArrayList<>();
+        int j = 0;
+
         for (int i = 0; i < length; i++) {
-            indexObjectPairs[i]=new Pair<>(i,objects[i]);
+            if(objects[i] == null){
+                nulls.add(i);
+            }else {
+                indexObjectPairs[j] = new Pair<>(i, objects[i]);
+                j++;
+            }
         }
 
-        Arrays.sort(indexObjectPairs,(p1,p2)->comparator.compare(p1.getValue(),p2.getValue()));
+        Arrays.sort(Arrays.copyOfRange(indexObjectPairs,0,length-nulls.size()),(p1,p2)->comparator.compare(p1.getValue(),p2.getValue()));
 
-        convertedIntegers[indexObjectPairs[0].getKey()]=0;
-        for (int i=1;i<length;i++) {
+        convertedIntegers[indexObjectPairs[0].getKey()]= (nulls.isEmpty()) ? 0 : 1;
+        for (int i=1;i<indexObjectPairs.length - nulls.size();i++) {
             Pair<Integer,Object> pair=indexObjectPairs[i];
             Pair<Integer,Object> lastPair=indexObjectPairs[i-1];
             convertedIntegers[pair.getKey()]= convertedIntegers[lastPair.getKey()] +
                     (pair.getValue().equals(lastPair.getValue()) ? 0:1);
+        }
+        for (Integer i : nulls){
+            convertedIntegers[i] = -1;
         }
         return convertedIntegers;
     }
