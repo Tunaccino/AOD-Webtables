@@ -20,6 +20,7 @@ public class SortedPartition {
     public int[] indexes;
     public List<Integer> begins;
     public int[] index2groupIndex;
+    public boolean[] nulls;
 
 
 
@@ -39,6 +40,8 @@ public class SortedPartition {
     public SortedPartition(DataFrame data) {
         int tupleCount=data.getTupleCount();
         indexes=new int[tupleCount];
+        nulls = new boolean[tupleCount];
+        Arrays.fill(nulls,false);
         for (int i = 0; i < tupleCount; i++) {
             indexes[i]=i;
         }
@@ -50,7 +53,6 @@ public class SortedPartition {
     }
 
     public SortedPartition intersect(DataFrame data, SingleAttributePredicate predicate){
-
         Statistics.addCount("用谓词扩展sp次数");
         if(isUnique())
             return this;
@@ -89,6 +91,8 @@ public class SortedPartition {
                 if(i==0 || !mergeData.get(i-1).getKey().equals(mergeData.get(i).getKey())){
                     newBegins.add(fillPointer);
                 }
+                if(mergeData.get(fillPointer).getKey() == -1)
+                    nulls[fillPointer] = true;
                 indexes[fillPointer]=mergeData.get(i).getValue();
                 fillPointer++;
             }
