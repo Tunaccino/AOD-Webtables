@@ -134,24 +134,25 @@ public class ImprovedTwoSideSortedPartition{
             (SortedPartition parentSide,SortedPartition expandSide,SortedPartition otherSide){
         Statistics.addCount("g1增量计算次数");
         TimeStatistics.TimeStopper timer = TimeStatistics.start("g1精确计算");
+        SortedPartition[] sps = removeNullWithParent(otherSide,expandSide,parentSide);
         long swapViolationCount=0,neverViolationCount=0;
-        int[] rightGroupIndex=otherSide.index2groupIndex;
-        int[] leftGroupIndex=expandSide.index2groupIndex;
+        int[] rightGroupIndex=sps[0].index2groupIndex;
+        int[] leftGroupIndex=sps[1].index2groupIndex;
 
-        int tupleCount=expandSide.index2groupIndex.length;
+        int tupleCount=sps[1].index2groupIndex.length;
         int[] index2convertedRight;
         int[] groupLastRightGroup;
         int[] groupLastConvertedValue = new int[0];
         if(g1IncrementalUseStateCompaction) {
             index2convertedRight = new int[tupleCount];
-            groupLastRightGroup = new int[parentSide.begins.size() - 1];
-            groupLastConvertedValue = new int[parentSide.begins.size() - 1];
+            groupLastRightGroup = new int[sps[2].begins.size() - 1];
+            groupLastConvertedValue = new int[sps[2].begins.size() - 1];
             Arrays.fill(groupLastRightGroup, -1);
             Arrays.fill(groupLastConvertedValue, -1);
             for (int i = 0; i < tupleCount; i++) {
-                int index = otherSide.indexes[i];
-                int leftGroup = parentSide.index2groupIndex[index];
-                int rightGroup = otherSide.index2groupIndex[index];
+                int index = sps[0].indexes[i];
+                int leftGroup = sps[2].index2groupIndex[index];
+                int rightGroup = sps[0].index2groupIndex[index];
                 if (rightGroup > groupLastRightGroup[leftGroup]) {
                     groupLastConvertedValue[leftGroup]++;
                     groupLastRightGroup[leftGroup] = rightGroup;
@@ -159,14 +160,14 @@ public class ImprovedTwoSideSortedPartition{
                 index2convertedRight[index] = groupLastConvertedValue[leftGroup];
             }
         }else {
-            index2convertedRight=otherSide.index2groupIndex;
+            index2convertedRight=sps[0].index2groupIndex;
         }
 
-        for(int beginPointer = 0; beginPointer< parentSide.begins.size()-1; beginPointer++) {
-            int groupBegin = parentSide.begins.get(beginPointer);
-            int groupEnd = parentSide.begins.get(beginPointer + 1);
-            int expandedFirstGroup=expandSide.index2groupIndex[expandSide.indexes[groupBegin]];
-            int expandedLastGroup=expandSide.index2groupIndex[expandSide.indexes[groupEnd-1]];
+        for(int beginPointer = 0; beginPointer< sps[2].begins.size()-1; beginPointer++) {
+            int groupBegin = sps[2].begins.get(beginPointer);
+            int groupEnd = sps[2].begins.get(beginPointer + 1);
+            int expandedFirstGroup=sps[1].index2groupIndex[sps[1].indexes[groupBegin]];
+            int expandedLastGroup=sps[1].index2groupIndex[sps[1].indexes[groupEnd-1]];
             if (expandedFirstGroup==expandedLastGroup){
                 continue;
             }
@@ -176,30 +177,30 @@ public class ImprovedTwoSideSortedPartition{
                 if (g1IncrementalUseStateCompaction){
                     rangeHigh=groupLastConvertedValue[beginPointer];
                 }else {
-                    rangeHigh = otherSide.begins.size();
+                    rangeHigh = sps[0].begins.size();
                 }
                 SegmentTreeForG1 tree = new SegmentTreeForG1(0,rangeHigh);
                 int[] int2Count=new int[rangeHigh+1];
                 for (int subBeginPointer = expandedFirstGroup; subBeginPointer <= expandedLastGroup; subBeginPointer++) {
-                    int subGroupBegin = expandSide.begins.get(subBeginPointer);
-                    int subGroupEnd = expandSide.begins.get(subBeginPointer + 1);
+                    int subGroupBegin = sps[1].begins.get(subBeginPointer);
+                    int subGroupEnd = sps[1].begins.get(subBeginPointer + 1);
                     for(int i=subGroupBegin;i<subGroupEnd;i++){
-                        int right=index2convertedRight[expandSide.indexes[i]];
+                        int right=index2convertedRight[sps[1].indexes[i]];
                         int neverViolationIncrease=tree.query(0,right-1);
                         neverViolationCount+=neverViolationIncrease;
                         swapViolationCount+=(subGroupBegin-groupBegin-int2Count[right]-neverViolationIncrease);
                     }
                     for(int i=subGroupBegin;i<subGroupEnd;i++){
-                        int right=index2convertedRight[expandSide.indexes[i]];
+                        int right=index2convertedRight[sps[1].indexes[i]];
                         tree.insert(right);
                         int2Count[right]++;
                     }
                 }
             }else {
                 for (int i=groupBegin+1;i<groupEnd;i++){
-                    int indexi=expandSide.indexes[i];
+                    int indexi=sps[1].indexes[i];
                     for(int j=groupBegin;j<i;j++){
-                        int indexj=expandSide.indexes[j];
+                        int indexj=sps[1].indexes[j];
                         if (leftGroupIndex[indexi]==leftGroupIndex[indexj]){
                             break;
                         }
@@ -218,26 +219,27 @@ public class ImprovedTwoSideSortedPartition{
 
     private long[] validateFullSwapAndNeverViolate(){
         Statistics.addCount("g1完全计算次数");
+        SortedPartition[] sps = removeNull(left,right);
         TimeStatistics.TimeStopper timer = TimeStatistics.start("g1精确计算");
         long swapViolationCount=0,neverViolationCount=0;
-        int[] row2RightGroupIndex= right.index2groupIndex;
-        SegmentTreeForG1 tree=new SegmentTreeForG1(0, right.begins.size()-2);
-        int[] globalInt2Count=new int[right.begins.size()-1];
+        int[] row2RightGroupIndex= sps[1].index2groupIndex;
+        SegmentTreeForG1 tree=new SegmentTreeForG1(0, sps[1].begins.size()-2);
+        int[] globalInt2Count=new int[sps[1].begins.size()-1];
 
-        for(int beginPointer = 0; beginPointer< left.begins.size()-1; beginPointer++) {
+        for(int beginPointer = 0; beginPointer< sps[0].begins.size()-1; beginPointer++) {
 
-            int groupBegin = left.begins.get(beginPointer);
-            int groupEnd = left.begins.get(beginPointer + 1);
+            int groupBegin = sps[0].begins.get(beginPointer);
+            int groupEnd = sps[0].begins.get(beginPointer + 1);
 
             for (int i = groupBegin ; i < groupEnd; i++) {
-                int rightGroupIndex=row2RightGroupIndex[left.indexes[i]];
+                int rightGroupIndex=row2RightGroupIndex[sps[0].indexes[i]];
                 int swapIncrease=tree.query(rightGroupIndex+1,Integer.MAX_VALUE);
                 swapViolationCount += swapIncrease;
                 neverViolationCount += (groupBegin-swapIncrease-globalInt2Count[rightGroupIndex]);
             }
 
             for (int i = groupBegin ; i < groupEnd; i++) {
-                int rightGroupIndex=row2RightGroupIndex[left.indexes[i]];
+                int rightGroupIndex=row2RightGroupIndex[sps[0].indexes[i]];
                 tree.insert(rightGroupIndex);
                 globalInt2Count[rightGroupIndex]++;
             }
@@ -248,17 +250,18 @@ public class ImprovedTwoSideSortedPartition{
 
     private long validateSplitViolation(){
         TimeStatistics.TimeStopper timer = TimeStatistics.start("g1精确计算");
-        int[] row2RightGroupIndex= right.index2groupIndex;
+        SortedPartition[] sps = removeNull(left,right);
+        int[] row2RightGroupIndex= sps[1].index2groupIndex;
         long splitViolationCount=0;
-        for(int beginPointer = 0; beginPointer< left.begins.size()-1; beginPointer++) {
+        for(int beginPointer = 0; beginPointer< sps[0].begins.size()-1; beginPointer++) {
 
-            int groupBegin = left.begins.get(beginPointer);
-            int groupEnd = left.begins.get(beginPointer + 1);
+            int groupBegin = sps[0].begins.get(beginPointer);
+            int groupEnd = sps[0].begins.get(beginPointer + 1);
             int groupLength=groupEnd-groupBegin;
             HashMap<Integer,Integer> groupInt2count=new HashMap<>();
 
             for (int i = groupBegin ; i < groupEnd; i++) {
-                int rightGroupIndex=row2RightGroupIndex[left.indexes[i]];
+                int rightGroupIndex=row2RightGroupIndex[sps[0].indexes[i]];
                 groupInt2count.put(rightGroupIndex,groupInt2count.getOrDefault(rightGroupIndex,0)+1);
             }
             for (int count : groupInt2count.values()) {
@@ -267,6 +270,245 @@ public class ImprovedTwoSideSortedPartition{
         }
         timer.stop();
         return splitViolationCount;
+    }
+
+    private SortedPartition[] removeNull(SortedPartition left, SortedPartition right){
+        SortedPartition[] partitions = new SortedPartition[2];
+        ArrayList<Integer> removedIndex = new ArrayList<>();
+        int nullCount = 0;
+        int leftNull = 0;
+        int rightNull = 0;
+
+        for (int i = 0; i < left.nulls.length; i++){
+            if(left.nulls[i] || right.nulls[i]) {
+                removedIndex.add(i);
+                nullCount++;
+            }
+            if(left.nulls[i])
+                leftNull++;
+            if(right.nulls[i])
+                rightNull++;
+        }
+
+        if(nullCount == 0)
+            return new SortedPartition[]{left,right};
+
+        int[] indexesL = new int[left.indexes.length-nullCount];
+        int[] indexesR = new int[right.indexes.length-nullCount];
+
+        ArrayList<Integer> beginsL = new ArrayList<>();
+        ArrayList<Integer> beginsR = new ArrayList<>();
+
+        int[] index2groupIndexL = new int[left.index2groupIndex.length-nullCount];
+        int[] index2groupIndexR = new int[right.index2groupIndex.length-nullCount];
+
+        //TODO implement actual functionality
+        int index = 0;
+        for(int i = 0; i < left.indexes.length;i++){
+            if(!(left.nulls[i] || right.nulls[i])){
+                indexesR[index] = right.indexes[i];
+                indexesL[index] = left.indexes[i];
+                index++;
+            }
+        }
+
+        int[] subtractL = new int[indexesL.length];
+        int[] subtractR = new int[indexesR.length];
+        Arrays.fill(subtractL,0);
+        Arrays.fill(subtractR,0);
+
+        for(int i = 0; i < removedIndex.size();i++){
+            for(int j = 0; j < indexesL.length; j++){
+                if(left.indexes[removedIndex.get(i)] < indexesL[j])
+                    subtractL[j] += 1;
+            }
+            for(int j = 0; j < indexesR.length; j++){
+                if(right.indexes[removedIndex.get(i)] < indexesR[j])
+                    subtractR[j] += 1;
+            }
+        }
+
+        for (int i = 0; i < indexesL.length; i++){
+            indexesL[i] -= subtractL[i];
+        }
+        for (int i = 0; i < indexesR.length; i++){
+            indexesR[i] -= subtractR[i];
+        }
+
+
+        int leftLength = left.nulls.length-1;
+        int rightLength = right.nulls.length-1;
+        int leftBeginsLength = left.begins.size()-1;
+        int rightBeginsLength = right.begins.size()-1;
+
+        if(left.nulls[0] || right.nulls[0]){
+            beginsL = new ArrayList<>(left.begins);
+            if(leftBeginsLength > 1)
+                beginsL.remove(1);
+            beginsR = new ArrayList<>(right.begins);
+            if(rightBeginsLength > 1)
+                beginsR.remove(1);
+
+        }
+        if(left.nulls[leftLength] || right.nulls[rightLength]){
+            beginsL = new ArrayList<>(left.begins);
+            if (beginsL.size() > 2)
+                beginsL.remove(beginsL.size() - 2);
+
+            beginsR = new ArrayList<>(right.begins);
+            if (beginsR.size() > 2)
+                beginsR.remove(beginsR.size() - 2);
+        }
+
+        beginsL.set(beginsL.size()-1,indexesL.length);
+        beginsR.set(beginsR.size()-1,indexesR.length);
+
+        partitions[0] = new SortedPartition(indexesL,beginsL,index2groupIndexL);
+        partitions[1] = new SortedPartition(indexesR,beginsR,index2groupIndexR);
+        partitions[0].updateIndex2IndexGroup();
+        partitions[1].updateIndex2IndexGroup();
+
+        boolean[] nullsL = new boolean [indexesL.length];
+        boolean[] nullsR = new boolean[indexesR.length];
+
+        Arrays.fill(nullsL,false);
+        Arrays.fill(nullsR,false);
+
+        partitions[0].nulls = nullsL;
+        partitions[1].nulls = nullsR;
+        return partitions;
+    }
+
+    private SortedPartition[] removeNullWithParent(SortedPartition left, SortedPartition right, SortedPartition parent){
+        SortedPartition[] partitions = new SortedPartition[3];
+        ArrayList<Integer> removedIndex = new ArrayList<>();
+        int nullCount = 0;
+
+        for (int i = 0; i < left.nulls.length; i++){
+            if(left.nulls[i] || right.nulls[i] || parent.nulls[i]) {
+                removedIndex.add(i);
+                nullCount++;
+            }
+        }
+
+        if(nullCount == 0)
+            return new SortedPartition[]{left,right,parent};
+
+        int[] indexesL = new int[left.indexes.length-nullCount];
+        int[] indexesR = new int[right.indexes.length-nullCount];
+        int[] indexesP = new int[parent.indexes.length-nullCount];
+
+        ArrayList<Integer> beginsL = new ArrayList<>();
+        ArrayList<Integer> beginsR = new ArrayList<>();
+        ArrayList<Integer> beginsP = new ArrayList<>();
+
+        int[] index2groupIndexL = new int[left.index2groupIndex.length-nullCount];
+        int[] index2groupIndexR = new int[right.index2groupIndex.length-nullCount];
+        int[] index2groupIndexP = new int[parent.index2groupIndex.length-nullCount];
+
+        //TODO implement actual functionality
+        int index = 0;
+        for(int i = 0; i < left.indexes.length;i++){
+            if(!(left.nulls[i] || right.nulls[i] || parent.nulls[i])){
+                indexesR[index] = right.indexes[i];
+                indexesL[index] = left.indexes[i];
+                indexesP[index] = parent.indexes[i];
+                index++;
+            }
+        }
+
+        int[] subtractL = new int[indexesL.length];
+        int[] subtractR = new int[indexesR.length];
+        int[] subtractP = new int[indexesP.length];
+        Arrays.fill(subtractL,0);
+        Arrays.fill(subtractR,0);
+        Arrays.fill(subtractP,0);
+
+        for(int i = 0; i < removedIndex.size();i++){
+            for(int j = 0; j < indexesL.length; j++){
+                if(left.indexes[removedIndex.get(i)] < indexesL[j])
+                    subtractL[j] += 1;
+            }
+            for(int j = 0; j < indexesR.length; j++){
+                if(right.indexes[removedIndex.get(i)] < indexesR[j])
+                    subtractR[j] += 1;
+            }
+            for (int j = 0; j < indexesP.length;j++){
+                if(parent.indexes[removedIndex.get(i)] < indexesP[j])
+                    subtractP[j] += 1;
+            }
+        }
+
+        for (int i = 0; i < indexesL.length; i++){
+            indexesL[i] -= subtractL[i];
+        }
+        for (int i = 0; i < indexesR.length; i++){
+            indexesR[i] -= subtractR[i];
+        }
+        for (int i = 0; i < indexesP.length;i++){
+            indexesP[i] -= subtractP[i];
+        }
+
+
+        int leftLength = left.nulls.length-1;
+        int rightLength = right.nulls.length-1;
+        int parentLength = parent.nulls.length-1;
+        int leftBeginsLength = left.begins.size()-1;
+        int rightBeginsLength = right.begins.size()-1;
+        int parentBeginsLength = parent.begins.size()-1;
+        beginsL = new ArrayList<>(left.begins);
+        beginsR = new ArrayList<>(right.begins);
+        beginsP = new ArrayList<>(parent.begins);
+
+        if(left.nulls[0] || right.nulls[0] || parent.nulls[0]){
+            if(leftBeginsLength > 1)
+                beginsL.remove(1);
+
+            if(rightBeginsLength > 1)
+                beginsR.remove(1);
+
+            if(parentBeginsLength > 1)
+                beginsP.remove(1);
+
+        }
+
+        //TODO add calculation if its necessary to remove an index in begins
+        if(left.nulls[leftLength] || right.nulls[rightLength] || parent.nulls[parentLength]){
+            if (beginsL.size() > 2)
+                beginsL.remove(beginsL.size() - 2);
+
+
+            if (beginsR.size() > 2)
+                beginsR.remove(beginsR.size() - 2);
+
+            if(beginsP.size() > 2)
+                beginsP.remove(beginsP.size() - 2);
+
+        }
+
+        beginsL.set(beginsL.size()-1,indexesL.length);
+        beginsR.set(beginsR.size()-1,indexesR.length);
+        beginsP.set(beginsP.size()-1,indexesP.length);
+
+        partitions[0] = new SortedPartition(indexesL,beginsL,index2groupIndexL);
+        partitions[1] = new SortedPartition(indexesR,beginsR,index2groupIndexR);
+        partitions[2] = new SortedPartition(indexesP,beginsP,index2groupIndexP);
+        partitions[0].updateIndex2IndexGroup();
+        partitions[1].updateIndex2IndexGroup();
+        partitions[2].updateIndex2IndexGroup();
+
+        boolean[] nullsL = new boolean [indexesL.length];
+        boolean[] nullsR = new boolean[indexesR.length];
+        boolean[] nullsP = new boolean[indexesR.length];
+
+        Arrays.fill(nullsL,false);
+        Arrays.fill(nullsR,false);
+        Arrays.fill(nullsP,false);
+
+        partitions[0].nulls = nullsL;
+        partitions[1].nulls = nullsR;
+        partitions[2].nulls = nullsP;
+        return partitions;
     }
 
     public ValidationResultWithAccurateBound validateForALODWithG1() {
