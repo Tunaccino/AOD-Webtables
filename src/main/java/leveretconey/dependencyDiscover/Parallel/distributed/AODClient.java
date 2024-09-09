@@ -9,14 +9,14 @@ import java.util.ArrayList;
 public class AODClient {
     public static void main(String[]args){
         try{
-            AODService service = (AODService) Naming.lookup("rmi://localhost/AODService");
+            AODService service = (AODService) Naming.lookup("rmi://192.168.178.25:1099/AODService");
 
             File directory = new File("data/exp11");
             File[] files = directory.listFiles();
             int half = files.length/2;
 
             Thread localProcessingThread = new Thread(() ->{
-                RunParallel runner = new RunParallel("data/exp11", "data/exp8 solutions");
+                RunParallel runner = new RunParallel("data/exp10", "data/exp8 solutions");
                 runner.runParallel();
 
             });
@@ -24,7 +24,7 @@ public class AODClient {
             Thread remoteProcessingThread = new Thread(() -> {
                for (int i = half; i < files.length; i++){
                    try{
-                       service.processWebTable("data/exp11");
+                       service.processWebTable("data/exp10", "data/exp8 solutions");
                    }catch (Exception e){
                        e.printStackTrace();
                    }
@@ -38,7 +38,6 @@ public class AODClient {
             remoteProcessingThread.join();
 
             System.out.println("Done calculating OD's!");
-            String result = service.processWebTable("Webtable  x data");
         }catch (Exception e){
             e.printStackTrace();
         }
