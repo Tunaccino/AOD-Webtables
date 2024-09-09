@@ -4,7 +4,9 @@ import leveretconey.cocoa.multipleStandard.DFSDiscovererWithMultipleStandard;
 import leveretconey.dependencyDiscover.Data.DataFormatConverter;
 import leveretconey.dependencyDiscover.Data.DataFrame;
 import leveretconey.dependencyDiscover.Dependency.LexicographicalOrderDependency;
+import leveretconey.pre.transformer.Transformer;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +29,7 @@ public class RunParallel {
 
     private Path directory;
     private Path output;
-    private ArrayList<Path> paths;
+    public ArrayList<Path> paths;
 
     /**
      * @param directory Directory consisting of Webtables to be checked for OD's.
@@ -37,6 +39,14 @@ public class RunParallel {
         this.directory = Paths.get(directory);
         this.output = Paths.get(output);
         setPaths();
+    }
+
+    public RunParallel(File[] files,String output){
+        this.output = Paths.get(output);
+
+        for (File file : files){
+            paths.add(file.toPath());
+        }
     }
 
     /**
@@ -58,7 +68,7 @@ public class RunParallel {
     /**
      * Runs the algorithm with data conversion but without parallelization.
      */
-    public void runWithConvert(){
+    public void runWithConvert() throws IOException {
         for (Path path : paths){
             String stPath = path.toString();
             DataFormatConverter converter = new DataFormatConverter();
@@ -76,9 +86,10 @@ public class RunParallel {
     public void run(){
         for (Path path : paths){
             String stPath = path.toString();
-            DataFrame data = DataFrame.fromCsv(stPath.substring(0,stPath.lastIndexOf(".")) + " converted.csv");
+            System.out.println("TABLE: " + stPath);
+            DataFrame data = DataFrame.fromCsv(stPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-            writeSolution(discoverer.discover(data, 0.01),stPath.substring(stPath.lastIndexOf("/")));
+            writeSolution(discoverer.discover(data, 0.01),output.toString());
         }
     }
 
@@ -135,7 +146,7 @@ public class RunParallel {
                     DataFrame data = DataFrame.fromCsv(stPath);
                     DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
 
-                    writeSolution(discoverer.discover(data, 0.01),stPath.substring(stPath.lastIndexOf("/")));
+                    writeSolution(discoverer.discover(data, 0.01),output.toString()+stPath.substring(stPath.lastIndexOf("/")));
                     return null;
                 });
 
@@ -168,7 +179,7 @@ public class RunParallel {
         }
 
         try {
-            Files.write(Paths.get(output.toString() + location),lines);
+            Files.write(Paths.get(location),lines);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
