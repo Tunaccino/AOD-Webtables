@@ -13,8 +13,10 @@ public class AODWebtables {
       public static void main(String[]args) {
         RunParallel run = new RunParallel("data/exp11", "data/exp8 solutions");
 
+        run.runParallel();
+
         //Warm up
-        for (int i = 0; i < 5; i++) {
+       /* for (int i = 0; i < 5; i++) {
             run.run();
             run.runParallel();
         }
@@ -38,7 +40,7 @@ public class AODWebtables {
 
         Long timeP = watch.getTime();
 
-        System.out.println("Time single : " + (time/10) + "ms\n" + "Time parallel : " + (timeP/10)+"ms");
+        System.out.println("Time single : " + (time/10) + "ms\n" + "Time parallel : " + (timeP/10)+"ms");*/
     }
 
 
