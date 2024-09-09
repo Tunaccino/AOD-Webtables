@@ -2,6 +2,7 @@ package leveretconey.dependencyDiscover.Parallel.distributed;
 
 import leveretconey.dependencyDiscover.Parallel.RunParallel;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -13,7 +14,7 @@ public class AODServiceImplementation extends UnicastRemoteObject implements AOD
 
 
     @Override
-    public String processWebTable(String input, String output) throws RemoteException {
+    public String processWebTable(File[] input, String output) throws RemoteException {
         RunParallel runner = new RunParallel(input,output);
         runner.runParallel();
 

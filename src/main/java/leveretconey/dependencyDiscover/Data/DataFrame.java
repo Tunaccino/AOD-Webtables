@@ -72,12 +72,13 @@ public class DataFrame {
                     int val = Integer.parseInt(part);
                     list.add(val);
 
-                    if(cons.get(j) == null){
+                    //TODO fix issue when running parallel
+                 /*   if(cons.get(j) == null){
                         cons.set(j,new Pair<>(val, true));
                     } else if (cons.get(j).getKey() != val) {
                         cons.set(j,new Pair<>(val,false));
                     }
-                    j++;
+                    j++;*/
                 }
                 if (list.size()!=result.getColumnCount()){
                     throw new RuntimeException(String.format
