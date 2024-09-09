@@ -25,10 +25,9 @@ public class AODServiceImplementation extends UnicastRemoteObject implements AOD
 
     public static void main(String[]args){
         try {
-            LocateRegistry.createRegistry(1099);
+            Registry registry = LocateRegistry.createRegistry(1099);
             AODService server = new AODServiceImplementation();
-            Registry registry = LocateRegistry.getRegistry();
-            java.rmi.Naming.rebind("rmi://localhost:1099/AODService",server);
+            registry.rebind("AODService", server);
             System.out.println("RMI-Server started waiting for connection ...");
         }catch (Exception e){
             e.printStackTrace();
