@@ -6,6 +6,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class AODServiceImplementation extends UnicastRemoteObject implements AODService {
@@ -19,13 +20,14 @@ public class AODServiceImplementation extends UnicastRemoteObject implements AOD
         RunParallel runner = new RunParallel(input,output);
         runner.runParallel();
 
-        return ("Processed: " + input);
+        return ("Processed: ");
     }
 
     public static void main(String[]args){
         try {
             LocateRegistry.createRegistry(1099);
             AODService server = new AODServiceImplementation();
+            Registry registry = LocateRegistry.getRegistry();
             java.rmi.Naming.rebind("rmi://localhost:1099/AODService",server);
             System.out.println("RMI-Server started waiting for connection ...");
         }catch (Exception e){
