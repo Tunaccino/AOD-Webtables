@@ -4,6 +4,7 @@ import leveretconey.dependencyDiscover.Parallel.RunParallel;
 
 import java.io.File;
 import java.net.InetAddress;
+import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -25,9 +26,10 @@ public class AODServiceImplementation extends UnicastRemoteObject implements AOD
 
     public static void main(String[]args){
         try {
-            Registry registry = LocateRegistry.createRegistry(1099);
+            LocateRegistry.createRegistry(1099); // Port 1099 ist der Standard-RMI-Port
             AODService server = new AODServiceImplementation();
-            registry.rebind("AODService", server);
+
+            Naming.rebind("rmi://localhost:1099/AODService", server);
             System.out.println("RMI-Server started waiting for connection ...");
         }catch (Exception e){
             e.printStackTrace();
