@@ -17,7 +17,7 @@ public class AODServiceImplementation extends UnicastRemoteObject implements AOD
 
 
     @Override
-    public String processWebTable(File[] input, String output) throws RemoteException {
+    public String processWebTable(FileArrayWrapper input, String output) throws RemoteException {
         RunParallel runner = new RunParallel(input,output);
         runner.runParallel();
 

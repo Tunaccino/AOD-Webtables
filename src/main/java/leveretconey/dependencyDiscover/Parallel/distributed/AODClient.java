@@ -18,24 +18,26 @@ public class AODClient {
             File[] filesLower = Arrays.copyOfRange(files,0,files.length/2);
             File[] filesUpper = Arrays.copyOfRange(files,files.length/2,files.length);
 
-        /*    Thread localProcessingThread = new Thread(() ->{
-                RunParallel runner = new RunParallel(filesLower, "data/exp8 solutions");
+            FileArrayWrapper filesLowerWrapper = new FileArrayWrapper(filesLower);
+
+            Thread localProcessingThread = new Thread(() ->{
+                RunParallel runner = new RunParallel(filesUpper, "data/exp8 solutions");
                 runner.runParallel();
 
-            });*/
+            });
 
             Thread remoteProcessingThread = new Thread(() -> {
                 try{
-                    service.processWebTable(filesLower, "data/exp8 solutions");
+                    service.processWebTable(filesLowerWrapper, "data/exp8 solutions");
                 }catch (Exception e){
                     e.printStackTrace();
                 }
             });
 
-            //localProcessingThread.start();
+            localProcessingThread.start();
             remoteProcessingThread.start();
 
-            //localProcessingThread.join();
+            localProcessingThread.join();
             remoteProcessingThread.join();
 
             System.out.println("Done calculating OD's!");
