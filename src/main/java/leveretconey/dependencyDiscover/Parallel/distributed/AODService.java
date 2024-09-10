@@ -5,5 +5,5 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface AODService extends Remote {
-    String processWebTable(FileArrayWrapper input, String output) throws RemoteException;
+    String processWebTable(String[] input, String output) throws RemoteException;
 }

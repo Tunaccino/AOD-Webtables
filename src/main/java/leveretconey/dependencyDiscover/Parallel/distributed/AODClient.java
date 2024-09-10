@@ -28,7 +28,9 @@ public class AODClient {
 
             Thread remoteProcessingThread = new Thread(() -> {
                 try{
-                    service.processWebTable(filesLowerWrapper, "data/exp8 solutions");
+                    service.processWebTable(Arrays.stream(filesLower)
+                            .map(File::getAbsolutePath)
+                            .toArray(String[]::new), "data/exp8 solutions");
                 }catch (Exception e){
                     e.printStackTrace();
                 }

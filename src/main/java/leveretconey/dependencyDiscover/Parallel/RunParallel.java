@@ -4,6 +4,7 @@ import leveretconey.cocoa.multipleStandard.DFSDiscovererWithMultipleStandard;
 import leveretconey.dependencyDiscover.Data.DataFormatConverter;
 import leveretconey.dependencyDiscover.Data.DataFrame;
 import leveretconey.dependencyDiscover.Dependency.LexicographicalOrderDependency;
+import leveretconey.dependencyDiscover.Parallel.distributed.FileArrayWrapper;
 import leveretconey.pre.transformer.Transformer;
 
 import java.io.File;
@@ -44,9 +45,37 @@ public class RunParallel {
     public RunParallel(File[] files,String output){
         this.output = Paths.get(output);
 
+        this.paths = new ArrayList<>();
+
         for (File file : files){
-            paths.add(file.toPath());
+            this.paths.add(file.toPath());
         }
+
+        directory = Paths.get("");
+    }
+
+    public RunParallel(FileArrayWrapper files, String output){
+        this.output = Paths.get(output);
+
+        this.paths = new ArrayList<>();
+
+        for (File file : files.getFiles()){
+            this.paths.add(file.toPath());
+        }
+
+        directory = Paths.get("");
+    }
+
+    public RunParallel(String[] files, String output){
+        this.output = Paths.get(output);
+
+        this.paths = new ArrayList<>();
+
+        for (String file : files){
+            this.paths.add(Path.of(file));
+        }
+
+        directory = Paths.get("");
     }
 
     /**

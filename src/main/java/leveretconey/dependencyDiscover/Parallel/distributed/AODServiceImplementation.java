@@ -17,7 +17,19 @@ public class AODServiceImplementation extends UnicastRemoteObject implements AOD
 
 
     @Override
-    public String processWebTable(FileArrayWrapper input, String output) throws RemoteException {
+    public String processWebTable(String[] input, String output) throws RemoteException {
+        if (input == null || input.length == 0) {
+            System.out.println("Received an empty or null file path array");
+            return "failed";
+        }
+        for (String path : input) {
+            File file = new File(path);
+            if (!file.exists()) {
+                System.out.println("File does not exist: " + path);
+                continue;
+            }
+        }
+
         RunParallel runner = new RunParallel(input,output);
         runner.runParallel();
 
