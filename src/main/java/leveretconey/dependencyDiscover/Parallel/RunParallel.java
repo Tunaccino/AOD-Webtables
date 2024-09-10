@@ -128,8 +128,7 @@ public class RunParallel {
             System.out.println("TABLE: " + stPath);
             DataFrame data = DataFrame.fromCsv(stPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-            collections.add(new Pair(discoverer.discover(data,0.01),path.toString()));
-            //writeSolution(discoverer.discover(data, 0.01),output.toString());
+            writeSolution(discoverer.discover(data, 0.01),output.toString()+stPath.substring(10));
         }
     }
 

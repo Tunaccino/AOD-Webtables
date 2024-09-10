@@ -2,6 +2,7 @@ package leveretconey.exp.exp8;
 
 import leveretconey.dependencyDiscover.Data.DataFormatConverter;
 import leveretconey.dependencyDiscover.Parallel.RunParallel;
+import leveretconey.dependencyDiscover.Parallel.distributed.AODClient;
 import leveretconey.pre.transformer.Transformer;
 import org.apache.commons.lang3.time.StopWatch;
 
@@ -11,14 +12,15 @@ import java.nio.file.Path;
 public class AODWebtables {
 
       public static void main(String[]args) {
-        RunParallel run = new RunParallel("data/exp11", "data/exp8 solutions");
+        RunParallel run = new RunParallel("data/exp10", "data/exp8 solutions");
+        AODClient client = new AODClient();
 
-        run.runParallel();
+        client.run();
 
         //Warm up
-       /* for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             run.run();
-            run.runParallel();
+            client.run();
         }
 
         StopWatch watch = new StopWatch();
@@ -34,13 +36,13 @@ public class AODWebtables {
 
         watch.start();
         for (int i = 0; i < 10; i++){
-            run.runParallel();
+            client.run();
         }
         watch.stop();
 
         Long timeP = watch.getTime();
 
-        System.out.println("Time single : " + (time/10) + "ms\n" + "Time parallel : " + (timeP/10)+"ms");*/
+        System.out.println("Time single : " + (time/10) + "ms\n" + "Time parallel : " + (timeP/10)+"ms");
     }
 
 
