@@ -1,8 +1,9 @@
-package leveretconey.dependencyDiscover.Parallel.distributed;
+package leveretconey.dependencyDiscover.Parallel.distributed.Client;
 
 import javafx.util.Pair;
 import leveretconey.dependencyDiscover.Dependency.LexicographicalOrderDependency;
 import leveretconey.dependencyDiscover.Parallel.RunParallel;
+import leveretconey.dependencyDiscover.Parallel.distributed.Service.AODService;
 
 import java.io.File;
 import java.io.IOException;

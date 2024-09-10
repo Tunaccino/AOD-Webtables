@@ -1,15 +1,13 @@
-package leveretconey.dependencyDiscover.Parallel.distributed;
+package leveretconey.dependencyDiscover.Parallel.distributed.Service;
 
 import javafx.util.Pair;
 import leveretconey.dependencyDiscover.Dependency.LexicographicalOrderDependency;
 import leveretconey.dependencyDiscover.Parallel.RunParallel;
 
 import java.io.File;
-import java.net.InetAddress;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collection;

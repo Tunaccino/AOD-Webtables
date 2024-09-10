@@ -1,13 +1,9 @@
 package leveretconey.exp.exp8;
 
-import leveretconey.dependencyDiscover.Data.DataFormatConverter;
 import leveretconey.dependencyDiscover.Parallel.RunParallel;
-import leveretconey.dependencyDiscover.Parallel.distributed.AODClient;
-import leveretconey.pre.transformer.Transformer;
-import org.apache.commons.lang3.time.StopWatch;
+import leveretconey.dependencyDiscover.Parallel.distributed.Client.AODClient;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import org.apache.commons.lang3.time.StopWatch;
 
 public class AODWebtables {
 
@@ -16,7 +12,6 @@ public class AODWebtables {
         AODClient client = new AODClient();
 
         client.run();
-
         //Warm up
         for (int i = 0; i < 5; i++) {
             run.run();

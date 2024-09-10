@@ -1,9 +1,8 @@
-package leveretconey.dependencyDiscover.Parallel.distributed;
+package leveretconey.dependencyDiscover.Parallel.distributed.Service;
 
 import javafx.util.Pair;
 import leveretconey.dependencyDiscover.Dependency.LexicographicalOrderDependency;
 
-import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
