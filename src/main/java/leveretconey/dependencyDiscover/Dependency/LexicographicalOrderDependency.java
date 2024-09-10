@@ -1,5 +1,6 @@
 package leveretconey.dependencyDiscover.Dependency;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +22,8 @@ import leveretconey.util.Util;
 /*
     ALOD的谓词只需要考虑大于等于和小于等于
  */
-public class LexicographicalOrderDependency implements AbstractDependency {
+public class LexicographicalOrderDependency implements AbstractDependency, Serializable {
+    private static long serialVersionUID = 1L;
     public SingleAttributePredicateList left=new SingleAttributePredicateList();
     public SingleAttributePredicateList right=new SingleAttributePredicateList();
     public BigDecimal error_rate ;

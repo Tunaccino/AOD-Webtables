@@ -6,6 +6,7 @@ import leveretconey.dependencyDiscover.Data.DataFormatConverter;
 import leveretconey.dependencyDiscover.Data.DataFrame;
 import leveretconey.dependencyDiscover.Dependency.LexicographicalOrderDependency;
 import leveretconey.dependencyDiscover.Parallel.distributed.FileArrayWrapper;
+import leveretconey.dependencyDiscover.Parallel.distributed.Wrapper;
 import leveretconey.pre.transformer.Transformer;
 
 import java.io.File;
@@ -32,7 +33,7 @@ public class RunParallel {
     private Path directory;
     private Path output;
     public ArrayList<Path> paths;
-    public ArrayList<Pair<Collection<LexicographicalOrderDependency>, String>> collections = new ArrayList<>();
+    public ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>> collections;
 
     /**
      * @param directory Directory consisting of Webtables to be checked for OD's.
@@ -78,6 +79,9 @@ public class RunParallel {
         }
 
         directory = Paths.get("");
+
+        collections = new ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>>();
+
     }
 
     /**
