@@ -1,5 +1,6 @@
 package leveretconey.dependencyDiscover.Parallel;
 
+import javafx.util.Pair;
 import leveretconey.cocoa.multipleStandard.DFSDiscovererWithMultipleStandard;
 import leveretconey.dependencyDiscover.Data.DataFormatConverter;
 import leveretconey.dependencyDiscover.Data.DataFrame;
@@ -31,6 +32,7 @@ public class RunParallel {
     private Path directory;
     private Path output;
     public ArrayList<Path> paths;
+    public ArrayList<Pair<Collection<LexicographicalOrderDependency>, String>> collections = new ArrayList<>();
 
     /**
      * @param directory Directory consisting of Webtables to be checked for OD's.
@@ -113,12 +115,14 @@ public class RunParallel {
      * Runs the algorithm without data conversion and without parallelization.
      */
     public void run(){
+        int index = 0;
         for (Path path : paths){
             String stPath = path.toString();
             System.out.println("TABLE: " + stPath);
             DataFrame data = DataFrame.fromCsv(stPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-            writeSolution(discoverer.discover(data, 0.01),output.toString());
+            collections.add(new Pair(discoverer.discover(data,0.01),path.toString()));
+            //writeSolution(discoverer.discover(data, 0.01),output.toString());
         }
     }
 
@@ -139,8 +143,8 @@ public class RunParallel {
                     converter.convert(config);
                     DataFrame data = DataFrame.fromCsv(stPath);
                     DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-
-                    writeSolution(discoverer.discover(data, 0.01),stPath.substring(stPath.lastIndexOf("/")));
+                    collections.add(new Pair<>(discoverer.discover(data,0.01),path.toString()));
+                    //writeSolution(discoverer.discover(data, 0.01),stPath.substring(stPath.lastIndexOf("/")));
                     return null;
                 });
 
@@ -174,8 +178,8 @@ public class RunParallel {
                 Future<Void> future = executor.submit(() -> {
                     DataFrame data = DataFrame.fromCsv(stPath);
                     DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-
-                    writeSolution(discoverer.discover(data, 0.01),output.toString()+stPath.substring(stPath.lastIndexOf("/")));
+                    collections.add(new Pair<>(discoverer.discover(data,0.01),path.toString()));
+                    //writeSolution(discoverer.discover(data, 0.01),output.toString()+stPath.substring(stPath.lastIndexOf("/")));
                     return null;
                 });
 
