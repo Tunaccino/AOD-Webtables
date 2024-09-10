@@ -1,12 +1,14 @@
 package leveretconey.dependencyDiscover.Predicate;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import leveretconey.dependencyDiscover.Data.DataFrame;
 
-public class SingleAttributePredicate implements AbstractPredicate{
+public class SingleAttributePredicate implements AbstractPredicate, Serializable {
+    private static long serialVersionUID = 1L;
     final public int attribute;
     final public Operator operator;
 

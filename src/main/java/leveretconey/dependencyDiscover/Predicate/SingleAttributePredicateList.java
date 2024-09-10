@@ -1,5 +1,6 @@
 package leveretconey.dependencyDiscover.Predicate;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -9,9 +10,10 @@ import java.util.Objects;
 import leveretconey.dependencyDiscover.Data.DataFrame;
 
 
-public class SingleAttributePredicateList implements AbstractPredicateList<SingleAttributePredicate>
+public class SingleAttributePredicateList implements AbstractPredicateList<SingleAttributePredicate>, Serializable
 ,Reversable<SingleAttributePredicateList>
 {
+    private static long serialVersionUID = 1L;
     public List<SingleAttributePredicate> list=new ArrayList<>();
 
     public class TupleComparator implements Comparator<Integer>{
