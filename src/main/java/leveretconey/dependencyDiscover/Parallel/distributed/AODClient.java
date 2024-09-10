@@ -55,7 +55,8 @@ public class AODClient {
                 }
 
                 try {
-                    Files.write(Paths.get("data/exp8 solutions/"+ pair.getValue().substring(pair.getValue().lastIndexOf("/"))),lines);
+                    String name = pair.getValue().substring(10);
+                    Files.write(Paths.get("data/exp8 solutions/"+ name),lines);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

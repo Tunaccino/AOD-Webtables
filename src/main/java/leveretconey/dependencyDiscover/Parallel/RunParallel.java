@@ -43,6 +43,7 @@ public class RunParallel {
         this.directory = Paths.get(directory);
         this.output = Paths.get(output);
         setPaths();
+        collections = new ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>>();
     }
 
     public RunParallel(File[] files,String output){
@@ -55,6 +56,7 @@ public class RunParallel {
         }
 
         directory = Paths.get("");
+        collections = new ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>>();
     }
 
     public RunParallel(FileArrayWrapper files, String output){
@@ -67,6 +69,7 @@ public class RunParallel {
         }
 
         directory = Paths.get("");
+        collections = new ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>>();
     }
 
     public RunParallel(String[] files, String output){
@@ -171,7 +174,7 @@ public class RunParallel {
     /**
      *  Runs the algorithm without data conversion but with parallelization.
      */
-    public void runParallel() {
+    public void runParallelRemote() {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         try {
@@ -184,6 +187,40 @@ public class RunParallel {
                     DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
                     collections.add(new Pair<>(discoverer.discover(data,0.01),path.toString()));
                     //writeSolution(discoverer.discover(data, 0.01),output.toString()+stPath.substring(stPath.lastIndexOf("/")));
+                    return null;
+                });
+
+                futures.add(future);
+            }
+
+            for (Future<Void> future : futures) {
+                try {
+                    future.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    /**
+     *  Runs the algorithm without data conversion but with parallelization.
+     */
+    public void runParallel() {
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        try {
+            List<Future<Void>> futures = new ArrayList<>();
+
+            for (Path path : paths) {
+                String stPath = path.toString();
+                Future<Void> future = executor.submit(() -> {
+                    DataFrame data = DataFrame.fromCsv(stPath);
+                    DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
+                    writeSolution(discoverer.discover(data, 0.01),output.toString()+stPath.substring(10));
                     return null;
                 });
 

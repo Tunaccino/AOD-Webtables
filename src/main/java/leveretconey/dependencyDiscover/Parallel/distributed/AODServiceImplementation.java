@@ -34,7 +34,7 @@ public class AODServiceImplementation extends UnicastRemoteObject implements AOD
         }
 
         RunParallel runner = new RunParallel(input,output);
-        runner.runParallel();
+        runner.runParallelRemote();
 
         return runner.collections;
     }
