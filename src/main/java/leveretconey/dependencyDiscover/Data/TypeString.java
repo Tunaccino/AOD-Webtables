@@ -14,9 +14,8 @@ public class TypeString extends AbstractType{
     }
 
     @Override
-    public String parse(String s) {
-        return s;
-    }
+    public String parse(String s) {return (s.equals("") || s.equals("-") || s.equals("null")
+    || s.equals("NAN") || s.equals("NA") || s.equals("N/A") || s.equals("NULL")) ? null : s;}
 
     @Override
     public Comparator<String> getComparator() {return String::compareTo;}

@@ -11,8 +11,9 @@ public class TypeDouble extends AbstractType{
 
     @Override
     public Double parse(String s) {
-        if(s.equals(""))
-            return Double.NEGATIVE_INFINITY;
+        if(s.equals("") || s.equals("-") || s.equals("null")
+                || s.equals("NAN") || s.equals("NA") || s.equals("N/A") || s.equals("NULL"))
+            return null;
         return Double.parseDouble(s);
     }
 

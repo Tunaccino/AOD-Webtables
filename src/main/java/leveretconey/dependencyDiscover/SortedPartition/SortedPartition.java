@@ -20,6 +20,7 @@ public class SortedPartition {
     public int[] indexes;
     public List<Integer> begins;
     public int[] index2groupIndex;
+    public boolean[] nulls;
 
 
 
@@ -30,6 +31,13 @@ public class SortedPartition {
 
     private SortedPartition(){
     }
+
+    public SortedPartition(int[] indexes, List<Integer> begins, int[] index2groupIndex){
+        this.indexes = indexes;
+        this.begins = begins;
+        this.index2groupIndex = index2groupIndex;
+    }
+
     public SortedPartition(DataFrame data, SingleAttributePredicateList list) {
         this(data);
         for (SingleAttributePredicate predicate : list) {
@@ -39,6 +47,8 @@ public class SortedPartition {
     public SortedPartition(DataFrame data) {
         int tupleCount=data.getTupleCount();
         indexes=new int[tupleCount];
+        nulls = new boolean[tupleCount];
+        Arrays.fill(nulls,false);
         for (int i = 0; i < tupleCount; i++) {
             indexes[i]=i;
         }
@@ -50,7 +60,6 @@ public class SortedPartition {
     }
 
     public SortedPartition intersect(DataFrame data, SingleAttributePredicate predicate){
-
         Statistics.addCount("用谓词扩展sp次数");
         if(isUnique())
             return this;
@@ -89,6 +98,8 @@ public class SortedPartition {
                 if(i==0 || !mergeData.get(i-1).getKey().equals(mergeData.get(i).getKey())){
                     newBegins.add(fillPointer);
                 }
+                if(mergeData.get(fillPointer).getKey() == -1)
+                    nulls[fillPointer] = true;
                 indexes[fillPointer]=mergeData.get(i).getValue();
                 fillPointer++;
             }
@@ -108,6 +119,8 @@ public class SortedPartition {
             return this;
         }
         TimeStatistics.TimeStopper timer = TimeStatistics.start("sp扩展");
+
+        intersectNulls(this, another);
 
         int tupleCount=getTupleCount();
         int originalGroupCount=getGroupCount();
@@ -150,6 +163,17 @@ public class SortedPartition {
         updateIndex2IndexGroup();
         timer.stop();
         return this;
+    }
+
+    private void intersectNulls(SortedPartition left, SortedPartition right){
+        boolean[] nulls = new boolean[left.nulls.length];
+
+        for (int i = 0; i < left.nulls.length;i++){
+            if(left.nulls[i] || right.nulls[i])
+                nulls[i] = true;
+        }
+
+        this.nulls = nulls;
     }
 
     @Deprecated
@@ -201,7 +225,7 @@ public class SortedPartition {
         return this;
     }
 
-    private void updateIndex2IndexGroup(){
+    public void updateIndex2IndexGroup(){
         int rightGroupIndex=-1;
         int beginPointer=0;
         for (int i = 0; i < indexes.length; i++) {
@@ -219,6 +243,7 @@ public class SortedPartition {
         result.indexes = Arrays.copyOf(indexes, indexes.length);
         result.begins = new ArrayList<>(begins);
         result.index2groupIndex=Arrays.copyOf(index2groupIndex,index2groupIndex.length);
+        result.nulls = Arrays.copyOf(nulls,nulls.length);
         timer.stop();
         return result;
     }

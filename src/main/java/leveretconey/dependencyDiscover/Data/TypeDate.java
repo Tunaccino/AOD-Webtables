@@ -17,8 +17,9 @@ public class TypeDate extends AbstractType{
     @Override
     public Object parse(String s) {
         try {
-            if (s.equals("")) {
-                return DATE_FORMAT.parse("01.01.1970");
+            if (s.equals("") || s.equals("-") || s.equals("null")
+                    || s.equals("NAN") || s.equals("NA") || s.equals("N/A") || s.equals("NULL")) {
+                return null;
             }
             return DATE_FORMAT.parse(s);
         }catch (ParseException e){
