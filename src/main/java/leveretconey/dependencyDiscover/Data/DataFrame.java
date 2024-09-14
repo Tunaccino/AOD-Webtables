@@ -15,7 +15,7 @@ import leveretconey.util.Util;
 public class DataFrame {
     protected List<List<Integer>> data=new ArrayList<List<Integer>>();
     private List<String> columnNames =new ArrayList<>();
-    public static List<Pair<Integer,Boolean>> cons = new ArrayList<>();
+    //public static List<Pair<Integer,Boolean>> cons = new ArrayList<>();
 
 
     public DataFrame() {
@@ -59,7 +59,7 @@ public class DataFrame {
             String[] parts=line.split(",");
             result.columnNames =Arrays.asList(parts);
 
-            cons = new ArrayList<>(Collections.nCopies(result.columnNames.size(),null));
+            //cons = new ArrayList<>(Collections.nCopies(result.columnNames.size(),null));
             int j = 0;
 
             //data
@@ -72,8 +72,7 @@ public class DataFrame {
                     int val = Integer.parseInt(part);
                     list.add(val);
 
-                    //TODO fix issue when running parallel
-                 /*   if(cons.get(j) == null){
+                    /*if(cons.get(j) == null){
                         cons.set(j,new Pair<>(val, true));
                     } else if (cons.get(j).getKey() != val) {
                         cons.set(j,new Pair<>(val,false));
