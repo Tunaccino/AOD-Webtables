@@ -27,14 +27,16 @@ public class ImprovedTwoSideSortedPartition{
 
     public ImprovedTwoSideSortedPartition parent;
     public boolean expandLeft;
+    private boolean[] nulls;
 
     public ImprovedTwoSideSortedPartition(DataFrame data) {
         left=new SortedPartition(data);
         right=new SortedPartition(data);
+        intersectNulls();
     }
 
     private ImprovedTwoSideSortedPartition(){
-
+        intersectNulls();
     }
 
     @Override
@@ -61,17 +63,20 @@ public class ImprovedTwoSideSortedPartition{
         for (SingleAttributePredicate predicate : dependency.right) {
             right.intersect(data,predicate);
         }
+
     }
 
     public ImprovedTwoSideSortedPartition(LexicographicalOrderDependency dependency
             ,SortedPartitionCache cache){
         left=cache.get(dependency.left);
         right=cache.get(dependency.right);
+        intersectNulls();
     }
 
     public ImprovedTwoSideSortedPartition(SortedPartition left, SortedPartition right) {
         this.left = left;
         this.right = right;
+        intersectNulls();
     }
 
     public ImprovedTwoSideSortedPartition(LexicographicalOrderDependency dependency
@@ -79,6 +84,17 @@ public class ImprovedTwoSideSortedPartition{
         this(dependency, cache);
         this.parent=parent;
         this.expandLeft=expandLeft;
+        intersectNulls();
+    }
+
+    private void intersectNulls(){
+        boolean[] nulls = new boolean[right.nulls.length];
+        for (int i = 0; i < right.nulls.length; i++){
+            if(left.nulls[i] || right.nulls[i])
+                nulls[i] = true;
+        }
+
+        this.nulls = nulls;
     }
 
     private ImprovedTwoSideSortedPartition deepClone() {
@@ -276,18 +292,13 @@ public class ImprovedTwoSideSortedPartition{
         SortedPartition[] partitions = new SortedPartition[2];
         ArrayList<Integer> removedIndex = new ArrayList<>();
         int nullCount = 0;
-        int leftNull = 0;
-        int rightNull = 0;
+
 
         for (int i = 0; i < left.nulls.length; i++){
             if(left.nulls[i] || right.nulls[i]) {
                 removedIndex.add(i);
                 nullCount++;
             }
-            if(left.nulls[i])
-                leftNull++;
-            if(right.nulls[i])
-                rightNull++;
         }
 
         if(nullCount == 0)
@@ -295,9 +306,6 @@ public class ImprovedTwoSideSortedPartition{
 
         int[] indexesL = new int[left.indexes.length-nullCount];
         int[] indexesR = new int[right.indexes.length-nullCount];
-
-        ArrayList<Integer> beginsL = new ArrayList<>();
-        ArrayList<Integer> beginsR = new ArrayList<>();
 
         int[] index2groupIndexL = new int[left.index2groupIndex.length-nullCount];
         int[] index2groupIndexR = new int[right.index2groupIndex.length-nullCount];
@@ -335,36 +343,10 @@ public class ImprovedTwoSideSortedPartition{
             indexesR[i] -= subtractR[i];
         }
 
+        NewDawn newDawn = new NewDawn(left,right);
 
-        int leftLength = left.nulls.length-1;
-        int rightLength = right.nulls.length-1;
-        int leftBeginsLength = left.begins.size()-1;
-        int rightBeginsLength = right.begins.size()-1;
-
-        if(left.nulls[0] || right.nulls[0]){
-            beginsL = new ArrayList<>(left.begins);
-            if(leftBeginsLength > 1)
-                beginsL.remove(1);
-            beginsR = new ArrayList<>(right.begins);
-            if(rightBeginsLength > 1)
-                beginsR.remove(1);
-
-        }
-        if(left.nulls[leftLength] || right.nulls[rightLength]){
-            beginsL = new ArrayList<>(left.begins);
-            if (beginsL.size() > 2)
-                beginsL.remove(beginsL.size() - 2);
-
-            beginsR = new ArrayList<>(right.begins);
-            if (beginsR.size() > 2)
-                beginsR.remove(beginsR.size() - 2);
-        }
-
-        beginsL.set(beginsL.size()-1,indexesL.length);
-        beginsR.set(beginsR.size()-1,indexesR.length);
-
-        partitions[0] = new SortedPartition(indexesL,beginsL,index2groupIndexL);
-        partitions[1] = new SortedPartition(indexesR,beginsR,index2groupIndexR);
+        partitions[0] = new SortedPartition(indexesL,newDawn.left,index2groupIndexL);
+        partitions[1] = new SortedPartition(indexesR,newDawn.right,index2groupIndexR);
         partitions[0].updateIndex2IndexGroup();
         partitions[1].updateIndex2IndexGroup();
 
@@ -379,40 +361,37 @@ public class ImprovedTwoSideSortedPartition{
         return partitions;
     }
 
-    private SortedPartition[] removeNullWithParent(SortedPartition left, SortedPartition right, SortedPartition parent){
+
+    private SortedPartition[] removeNullWithParent(SortedPartition left, SortedPartition right, SortedPartition other){
         SortedPartition[] partitions = new SortedPartition[3];
         ArrayList<Integer> removedIndex = new ArrayList<>();
         int nullCount = 0;
 
         for (int i = 0; i < left.nulls.length; i++){
-            if(left.nulls[i] || right.nulls[i] || parent.nulls[i]) {
+            if(left.nulls[i] || right.nulls[i] || other.nulls[i]) {
                 removedIndex.add(i);
                 nullCount++;
             }
         }
 
         if(nullCount == 0)
-            return new SortedPartition[]{left,right,parent};
+            return new SortedPartition[]{left,right,other};
 
         int[] indexesL = new int[left.indexes.length-nullCount];
         int[] indexesR = new int[right.indexes.length-nullCount];
-        int[] indexesP = new int[parent.indexes.length-nullCount];
-
-        ArrayList<Integer> beginsL = new ArrayList<>();
-        ArrayList<Integer> beginsR = new ArrayList<>();
-        ArrayList<Integer> beginsP = new ArrayList<>();
+        int[] indexesP = new int[other.indexes.length-nullCount];
 
         int[] index2groupIndexL = new int[left.index2groupIndex.length-nullCount];
         int[] index2groupIndexR = new int[right.index2groupIndex.length-nullCount];
-        int[] index2groupIndexP = new int[parent.index2groupIndex.length-nullCount];
+        int[] index2groupIndexP = new int[other.index2groupIndex.length-nullCount];
 
         //TODO implement actual functionality
         int index = 0;
         for(int i = 0; i < left.indexes.length;i++){
-            if(!(left.nulls[i] || right.nulls[i] || parent.nulls[i])){
+            if(!(left.nulls[i] || right.nulls[i] || other.nulls[i])){
                 indexesR[index] = right.indexes[i];
                 indexesL[index] = left.indexes[i];
-                indexesP[index] = parent.indexes[i];
+                indexesP[index] = other.indexes[i];
                 index++;
             }
         }
@@ -434,7 +413,7 @@ public class ImprovedTwoSideSortedPartition{
                     subtractR[j] += 1;
             }
             for (int j = 0; j < indexesP.length;j++){
-                if(parent.indexes[removedIndex.get(i)] < indexesP[j])
+                if(other.indexes[removedIndex.get(i)] < indexesP[j])
                     subtractP[j] += 1;
             }
         }
@@ -449,50 +428,11 @@ public class ImprovedTwoSideSortedPartition{
             indexesP[i] -= subtractP[i];
         }
 
+        NewDawn newDawn = new NewDawn(left,right,other);
 
-        int leftLength = left.nulls.length-1;
-        int rightLength = right.nulls.length-1;
-        int parentLength = parent.nulls.length-1;
-        int leftBeginsLength = left.begins.size()-1;
-        int rightBeginsLength = right.begins.size()-1;
-        int parentBeginsLength = parent.begins.size()-1;
-        beginsL = new ArrayList<>(left.begins);
-        beginsR = new ArrayList<>(right.begins);
-        beginsP = new ArrayList<>(parent.begins);
-
-        if(left.nulls[0] || right.nulls[0] || parent.nulls[0]){
-            if(leftBeginsLength > 1)
-                beginsL.remove(1);
-
-            if(rightBeginsLength > 1)
-                beginsR.remove(1);
-
-            if(parentBeginsLength > 1)
-                beginsP.remove(1);
-
-        }
-
-        //TODO add calculation if its necessary to remove an index in begins
-        if(left.nulls[leftLength] || right.nulls[rightLength] || parent.nulls[parentLength]){
-            if (beginsL.size() > 2)
-                beginsL.remove(beginsL.size() - 2);
-
-
-            if (beginsR.size() > 2)
-                beginsR.remove(beginsR.size() - 2);
-
-            if(beginsP.size() > 2)
-                beginsP.remove(beginsP.size() - 2);
-
-        }
-
-        beginsL.set(beginsL.size()-1,indexesL.length);
-        beginsR.set(beginsR.size()-1,indexesR.length);
-        beginsP.set(beginsP.size()-1,indexesP.length);
-
-        partitions[0] = new SortedPartition(indexesL,beginsL,index2groupIndexL);
-        partitions[1] = new SortedPartition(indexesR,beginsR,index2groupIndexR);
-        partitions[2] = new SortedPartition(indexesP,beginsP,index2groupIndexP);
+        partitions[0] = new SortedPartition(indexesL,newDawn.left,index2groupIndexL);
+        partitions[1] = new SortedPartition(indexesR,newDawn.right,index2groupIndexR);
+        partitions[2] = new SortedPartition(indexesP,newDawn.other,index2groupIndexP);
         partitions[0].updateIndex2IndexGroup();
         partitions[1].updateIndex2IndexGroup();
         partitions[2].updateIndex2IndexGroup();
