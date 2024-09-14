@@ -106,17 +106,17 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
 
         Collection<LexicographicalOrderDependency> result = tree.getValidODs();
 
-        if (result.isEmpty()) {
+      /*  if (result.isEmpty()) {
             LexicographicalOrderDependency lod = new LexicographicalOrderDependency();
 
-           /* for (int i = 0; i < data.cons.size(); i++) {
+           for (int i = 0; i < data.cons.size(); i++) {
                if (data.cons.get(i).getValue()) {
                     lod.right.add(new SingleAttributePredicate(i, Operator.lessEqual));
 
                 }
-            }*/
+            }
             result.add(lod);
-        }
+        }*/
 
 
         /**

@@ -62,5 +62,9 @@ tasks.named('test', Test) {
 }
 
 tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
     options.compilerArgs += ['-Xlint:none']
+}
+tasks.withType(JavaExec){
+    jvmArgs = ['-Dfile.encoding=UTF-8']
 }
