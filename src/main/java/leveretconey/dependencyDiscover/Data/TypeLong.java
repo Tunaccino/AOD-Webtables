@@ -10,7 +10,8 @@ public class TypeLong extends AbstractType{
 
     @Override
     public Long parse(String s) {
-        if ("".equals(s))
+        if (s.equals("") || s.equals("-") || s.equals("null")
+                || s.equals("NAN") || s.equals("NA") || s.equals("N/A") || s.equals("NULL"))
             return null;
         try {
             return Long.parseLong(s);
