@@ -120,6 +120,8 @@ public class SortedPartition {
         }
         TimeStatistics.TimeStopper timer = TimeStatistics.start("sp扩展");
 
+        intersectNulls(this, another);
+
         int tupleCount=getTupleCount();
         int originalGroupCount=getGroupCount();
         int[] newBeginsInArray=new int[tupleCount];
@@ -161,6 +163,17 @@ public class SortedPartition {
         updateIndex2IndexGroup();
         timer.stop();
         return this;
+    }
+
+    private void intersectNulls(SortedPartition left, SortedPartition right){
+        boolean[] nulls = new boolean[left.nulls.length];
+
+        for (int i = 0; i < left.nulls.length;i++){
+            if(left.nulls[i] || right.nulls[i])
+                nulls[i] = true;
+        }
+
+        this.nulls = nulls;
     }
 
     @Deprecated

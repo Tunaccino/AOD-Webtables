@@ -64,7 +64,7 @@ public class RunParallel {
             DataFormatConverter converter = new DataFormatConverter();
             DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(path.toString());
             converter.convert(config);
-            DataFrame data = DataFrame.fromCsv(stPath.substring(0,stPath.lastIndexOf(".")) + " converted.csv");
+            DataFrame data = DataFrame.fromCsv(stPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
             writeSolution(discoverer.discover(data, 0.01),stPath.substring(stPath.lastIndexOf("/")));
         }
