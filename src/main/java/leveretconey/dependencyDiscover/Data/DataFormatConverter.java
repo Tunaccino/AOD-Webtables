@@ -7,12 +7,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import javafx.util.Pair;
 import leveretconey.util.Util;
 
 public class DataFormatConverter {
 
+    public boolean filter;
     private static final Type[] supportedTypes=new Type[]
             {new TypeNull(),new TypeLong(),new TypeDouble(),new TypeDate(),new TypeString()};
 
@@ -146,6 +148,7 @@ public class DataFormatConverter {
         public Character delimeter;
         public DataFramePreFilter[] preFilters;
         public DataFramePostFilter[] postFilters;
+        public Type[] types;
 
         public DataFormatConverterConfig(String inputPath) {
             this.inputPath = inputPath;
@@ -189,6 +192,7 @@ public class DataFormatConverter {
             int columnCount=splitByCharConsideringQuotationMark
                     (lines[0],config.delimeter,Integer.MIN_VALUE).length;
 
+            config.types = new Type[columnCount];
             //make Head
             if(config.hasHead){
                 convertedDataFrame.heads=splitByCharConsideringQuotationMark
@@ -280,8 +284,36 @@ public class DataFormatConverter {
 
             // type inference and convert
             convertedDataFrame.data=new Integer[columnCount][];
+            if(filter) {
+                boolean[] remove = new boolean[cells.length];
+                int sub = 0;
+                for (int i = 0; i < cells.length; i++) {
+                    double avg = Arrays.stream(cells[i])
+                            .mapToInt(cell -> cell.length())
+                            .average()
+                            .orElse(0);
+
+                    if (avg > 30) {
+                        remove[i] = true;
+                        sub++;
+                    }
+
+                }
+                String[][] newCells = new String[cells.length - sub][];
+                String[] newHeads = new String[convertedDataFrame.heads.length-sub];
+                for (int i = 0; i < remove.length; i++) {
+                    if (!remove[i]) {
+                        newCells[i] = cells[i];
+                        newHeads[i] = convertedDataFrame.heads[i];
+                    }
+                }
+                cells = newCells;
+                convertedDataFrame.heads = newHeads;
+                columnCount = convertedDataFrame.heads.length;
+            }
+
             for (int column = 0; column < columnCount; column++) {
-                convertedDataFrame.data[column]=inferAndConvertColumn(cells[column]);
+                convertedDataFrame.data[column]=inferAndConvertColumn(cells[column],config.types,column);
                 cells[column]=null;
             }
 
@@ -323,7 +355,7 @@ public class DataFormatConverter {
         return result;
     }
 
-    private Integer[] inferAndConvertColumn(String[] column){
+    private Integer[] inferAndConvertColumn(String[] column, Type[] types,int index){
         if(column.length==0)
             return new Integer[0];
         int typePointer=0;
@@ -339,6 +371,7 @@ public class DataFormatConverter {
                 break;
         }
         Type inferredType=supportedTypes[typePointer];
+        types[index] = inferredType;
 
         //convert string to its true type
         Object[] convertedData=new Object[length];
