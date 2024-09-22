@@ -296,15 +296,23 @@ public class DataFormatConverter {
                     if (avg > 30) {
                         remove[i] = true;
                         sub++;
+                        continue;
+                    }
+
+                    if (Arrays.asList("key","id","identifier","primary key","row_id").contains(convertedDataFrame.heads[i])) {
+                        remove[i] = true;
+                        sub++;
                     }
 
                 }
                 String[][] newCells = new String[cells.length - sub][];
                 String[] newHeads = new String[convertedDataFrame.heads.length-sub];
+                int j = 0;
                 for (int i = 0; i < remove.length; i++) {
                     if (!remove[i]) {
-                        newCells[i] = cells[i];
-                        newHeads[i] = convertedDataFrame.heads[i];
+                        newCells[j] = cells[i];
+                        newHeads[j] = convertedDataFrame.heads[i];
+                        j++;
                     }
                 }
                 cells = newCells;
