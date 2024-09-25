@@ -1,8 +1,11 @@
 package leveretconey.dependencyDiscover.Data;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 public class TypeLong extends AbstractType{
+    private List<String> nullRep = Arrays.asList("","-","null","NAN","NA","N/A","NULL","_","?","??","Unknown","unknown","--","n/a",".","(n/a)","---");
 
     public TypeLong() {
         super("[\\+-]?([1-9]\\d*|0)");
@@ -10,8 +13,7 @@ public class TypeLong extends AbstractType{
 
     @Override
     public Long parse(String s) {
-        if (s.equals("") || s.equals("-") || s.equals("null")
-                || s.equals("NAN") || s.equals("NA") || s.equals("N/A") || s.equals("NULL"))
+        if(nullRep.contains(s))
             return null;
         try {
             return Long.parseLong(s);
