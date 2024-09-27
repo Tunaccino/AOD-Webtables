@@ -1,10 +1,12 @@
 package leveretconey.gui;
 
 import leveretconey.dependencyDiscover.Parallel.RunParallel;
+import leveretconey.pre.transformer.Transformer;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
+import java.io.IOException;
+import java.util.List;
 
 public class Discoverer extends JFrame{
     private JPanel contentPane;
@@ -30,6 +32,8 @@ public class Discoverer extends JFrame{
        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        setResizable(false);
        setVisible(true);
+       inputF.setEditable(false);
+       outputF.setEditable(false);
 
        normalCheckBox.addActionListener(new ActionListener() {
            @Override
@@ -38,6 +42,16 @@ public class Discoverer extends JFrame{
                ipLabel.setVisible(false);
                parallelCheckBox.setSelected(false);
                distributedCheckBox.setSelected(false);
+               progressBar.setStringPainted(false);
+           }
+       });
+
+       normalCheckBox.addItemListener(new ItemListener() {
+           @Override
+           public void itemStateChanged(ItemEvent e) {
+               inputF.setEditable(e.getStateChange() == ItemEvent.SELECTED);
+               outputF.setEditable(e.getStateChange() == ItemEvent.SELECTED);
+               progressBar.setStringPainted(false);
            }
        });
 
@@ -48,8 +62,17 @@ public class Discoverer extends JFrame{
                ipLabel.setVisible(false);
                normalCheckBox.setSelected(false);
                distributedCheckBox.setSelected(false);
+               progressBar.setStringPainted(false);
            }
        });
+
+        parallelCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                inputF.setEditable(e.getStateChange() == ItemEvent.SELECTED);
+                outputF.setEditable(e.getStateChange() == ItemEvent.SELECTED);
+            }
+        });
 
 
        distributedCheckBox.addActionListener(new ActionListener() {
@@ -59,20 +82,114 @@ public class Discoverer extends JFrame{
                ipLabel.setVisible(true);
                normalCheckBox.setSelected(false);
                parallelCheckBox.setSelected(false);
+               progressBar.setStringPainted(false);
            }
        });
 
+        distributedCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                inputF.setEditable(e.getStateChange() == ItemEvent.SELECTED);
+                outputF.setEditable(e.getStateChange() == ItemEvent.SELECTED);
+            }
+        });
 
         discoverButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                RunParallel runner = new RunParallel(inputF.getText(), outputF.getText());
-                progressBar.setStringPainted(true);
-                progressBar.isIndeterminate();
-                runner.run();
+                if((!inputF.getText().trim().isEmpty()&&!outputF.getText().trim().isEmpty()) && (formattedCheckBox.isSelected() || CSVCheckBox.isSelected() || otherCheckBox.isSelected())
+                && ((distributedCheckBox.isSelected() && !ipF.getText().trim().isEmpty()) || !distributedCheckBox.isSelected())) {
+                    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() {
+
+                            RunParallel runner = new RunParallel(inputF.getText(), outputF.getText());
+                            runner.run();
+                            return null;
+                        }
+
+                        @Override
+                        protected void done() {
+                            progressBar.setIndeterminate(false);
+                            progressBar.setValue(100);
+                            progressBar.setString("Fertig!");
+                        }
+                    };
+                    worker.execute();
+                }else {
+                    progressBar.setStringPainted(true);
+                    progressBar.setString("Incomplete selection !!!");
+                }
+            }
+        });
+
+
+        inputF.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                progressBar.setStringPainted(false);
+            }
+        });
+        outputF.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                progressBar.setStringPainted(false);
+            }
+        });
+        ipF.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                progressBar.setStringPainted(false);
+            }
+        });
+        formattedCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                progressBar.setStringPainted(false);
+                progressBar.setIndeterminate(true);
+                CSVCheckBox.setSelected(false);
+                otherCheckBox.setSelected(false);
+                filteringCheckBox.setSelected(false);
+            }
+        });
+        CSVCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                progressBar.setStringPainted(false);
+                progressBar.setIndeterminate(true);
+                formattedCheckBox.setSelected(false);
+                otherCheckBox.setSelected(false);
+            }
+        });
+        otherCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                progressBar.setStringPainted(false);
+                progressBar.setIndeterminate(true);
+                formattedCheckBox.setSelected(false);
+                CSVCheckBox.setSelected(false);
+            }
+        });
+        filteringCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                formattedCheckBox.setSelected(false);
             }
         });
     }
+
+    public void taskFinder() throws IOException {
+        if(normalCheckBox.isSelected()){
+
+        } else if(parallelCheckBox.isSelected()){
+
+        } else if(distributedCheckBox.isSelected()){
+
+        }
+    }
+
+
+
 
     public static void main(String[] args) {
         try {
