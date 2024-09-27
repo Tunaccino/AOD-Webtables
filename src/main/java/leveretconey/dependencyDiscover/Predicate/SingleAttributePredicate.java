@@ -13,8 +13,11 @@ public class SingleAttributePredicate implements AbstractPredicate, Serializable
     final public Operator operator;
 
 
-    static private List<List<SingleAttributePredicate>> cache=new ArrayList<>();
+    //static private List<List<SingleAttributePredicate>> cache=new ArrayList<>();
+    private static final ThreadLocal<List<List<SingleAttributePredicate>>> threadLocalCache =
+            ThreadLocal.withInitial(ArrayList::new);
     public static SingleAttributePredicate getInstance(int attribute,Operator operator){
+        List<List<SingleAttributePredicate>> cache = threadLocalCache.get();
         while (attribute>=cache.size()){
             List<SingleAttributePredicate> list=new ArrayList<>();
             for (Operator value : Operator.values()) {

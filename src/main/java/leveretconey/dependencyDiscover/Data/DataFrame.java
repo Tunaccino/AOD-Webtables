@@ -15,7 +15,7 @@ import leveretconey.util.Util;
 public class DataFrame {
     protected List<List<Integer>> data=new ArrayList<List<Integer>>();
     private List<String> columnNames =new ArrayList<>();
-    //public static List<Pair<Integer,Boolean>> cons = new ArrayList<>();
+    public List<Pair<Integer,Boolean>> cons;
 
 
     public DataFrame() {
@@ -59,7 +59,7 @@ public class DataFrame {
             String[] parts=line.split(",");
             result.columnNames =Arrays.asList(parts);
 
-            //cons = new ArrayList<>(Collections.nCopies(result.columnNames.size(),null));
+            result.cons = new ArrayList<>(Collections.nCopies(result.columnNames.size(),null));
             int j = 0;
 
             //data
@@ -72,12 +72,12 @@ public class DataFrame {
                     int val = Integer.parseInt(part);
                     list.add(val);
 
-                    /*if(cons.get(j) == null){
-                        cons.set(j,new Pair<>(val, true));
-                    } else if (cons.get(j).getKey() != val) {
-                        cons.set(j,new Pair<>(val,false));
+                    if(result.cons.get(j) == null){
+                        result.cons.set(j,new Pair<>(val, true));
+                    } else if (result.cons.get(j).getKey() != val) {
+                        result.cons.set(j,new Pair<>(val,false));
                     }
-                    j++;*/
+                    j++;
                 }
                 if (list.size()!=result.getColumnCount()){
                     throw new RuntimeException(String.format

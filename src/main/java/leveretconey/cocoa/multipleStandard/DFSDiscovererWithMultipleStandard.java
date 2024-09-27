@@ -2,8 +2,12 @@ package leveretconey.cocoa.multipleStandard;
 
 import java.security.InvalidParameterException;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javafx.util.Pair;
+import leveretconey.dependencyDiscover.MinimalityChecker.ALODMinimalityCheckerConsiderSPChange;
 import leveretconey.dependencyDiscover.Predicate.Operator;
 import leveretconey.util.ReturnData;
 import leveretconey.cocoa.sample.DFSISPCacheAttachedToNode;
@@ -43,9 +47,11 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
     public  double sumRate = 0;
     public  int sumCount = 0;
     public List<String> aod = new ArrayList<>();
-    public static int count = 0;
+    public  int count = 0;
+    private final Lock lock = new ReentrantLock();
 
-    public static enum ValidatorType{
+
+    public enum ValidatorType{
         G1,G3
     }
 
@@ -80,12 +86,12 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
         this.data               = data;
         timer                   = new Timer();
         int maxSpCache          = (int)(2.0*1024*1024*1024/4/3/data.getTupleCount());
-//        int maxSpCache          = 0;
+        //int maxSpCache          = 0;
         spCache                 = new TwoSideDFSSPCache(data,maxSpCache);
         //原始实验
         minimalityChecker       = new ALODMinimalityCheckerUseFD();
         //变体实验
-//        minimalityChecker       = new ALODMinimalityCheckerConsiderSPChange(spCache);
+        //minimalityChecker       = new ALODMinimalityCheckerConsiderSPChange(spCache);
         traversalGateway        = new ComplexTimeGateway();
 //        traversalGateway        = Gateway.AlwaysOpen;
         ispCache                = new DFSISPCacheAttachedToNode(spCache);
@@ -105,8 +111,8 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
         }
 
         Collection<LexicographicalOrderDependency> result = tree.getValidODs();
-
-      /*  if (result.isEmpty()) {
+       //------------------------------------------------------------------------
+        if (result.isEmpty()) {
             LexicographicalOrderDependency lod = new LexicographicalOrderDependency();
 
            for (int i = 0; i < data.cons.size(); i++) {
@@ -116,7 +122,7 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
                 }
             }
             result.add(lod);
-        }*/
+        }
 
 
         /**
@@ -124,9 +130,10 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
          */
         if (Gateway.LogGateway.isOpen(Gateway.LogGateway.INFO)) {
             Util.out(String.format("运行结束，用时%.3fs,发现od %d个"
-            , timer.getTimeUsedInSecond(), odCount));
+                    , timer.getTimeUsedInSecond(), odCount));
         }
         int n = 0;
+
         Queue<ALODTreeNode> queue = new LinkedList<>();
         queue.add(tree.getRoot());
         while(!queue.isEmpty()){
@@ -138,7 +145,7 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
                 }
             }
         }
-        System.out.println(n);
+
         return result;
     }
 
@@ -182,45 +189,45 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
         return new ReturnData(result, data);
     }
 
-    
+
     private void search(ALODTreeNode parent){
 //        System.out.println(parent);
-        count++;
-        if(parent.toLOD().toString().equals("6<=,10>=,1>=->4<=,2<=,3>=,9>=")){
-            Util.out(timer.getTimeUsedInSecond());
-            return;
-        }
-        if(!parent.willExpand()){
-            return;
-        }
-        ispCache.updateWorkingNode(parent);
-        List<SingleAttributePredicate> expandPredicates = parent.toLOD()
-                .getExpandPredicates(data, minimalityChecker, parent.isExpandLeft());
+            count++;
+            if (parent.toLOD().toString().equals("6<=,10>=,1>=->4<=,2<=,3>=,9>=")) {
+                Util.out(timer.getTimeUsedInSecond());
+                return;
+            }
+            if (!parent.willExpand()) {
+                return;
+            }
+            ispCache.updateWorkingNode(parent);
+            List<SingleAttributePredicate> expandPredicates = parent.toLOD()
+                    .getExpandPredicates(data, minimalityChecker, parent.isExpandLeft());
 //        List<SingleAttributePredicate> expandPredicates = parent.toLOD()
 //                .getExpandPredicates(data);
-        SortedPartition parentSp=spCache.get(parent.sideToExpand());
-        SingleAttributePredicateList parentSideToExpand = parent.sideToExpand();
-        for(int i=expandPredicates.size()-1;i>=0;i--){
-            SingleAttributePredicate expandPredicate=expandPredicates.get(i);
-            SingleAttributePredicateList expandedSide=parentSideToExpand.deepCloneAndAdd(expandPredicate);
-            SortedPartition expandedSp=spCache.get(expandedSide);
-            if (expandedSp.equalsFast(parentSp)){
-                spCache.mayRemove(expandedSide);
-                minimalityChecker.insert(parentSideToExpand,expandPredicate);
-                continue;
-            }
-            ALODTreeNode child = parent.expand(expandPredicate);
-            ispCache.updateWorkingNode(child);
-            child.validateIfNecessary(validators,data);
+            SortedPartition parentSp = spCache.get(parent.sideToExpand());
+            SingleAttributePredicateList parentSideToExpand = parent.sideToExpand();
+            for (int i = expandPredicates.size() - 1; i >= 0; i--) {
+                SingleAttributePredicate expandPredicate = expandPredicates.get(i);
+                SingleAttributePredicateList expandedSide = parentSideToExpand.deepCloneAndAdd(expandPredicate);
+                SortedPartition expandedSp = spCache.get(expandedSide);
+                if (expandedSp.equalsFast(parentSp)) {
+                    spCache.mayRemove(expandedSide);
+                    minimalityChecker.insert(parentSideToExpand, expandPredicate);
+                    continue;
+                }
+                ALODTreeNode child = parent.expand(expandPredicate);
+                ispCache.updateWorkingNode(child);
+                child.validateIfNecessary(validators, data);
 
-            if (child.isValid()){
-                odCount++;
+                if (child.isValid()) {
+                    odCount++;
+                }
+                if (Gateway.LogGateway.isOpen(Gateway.LogGateway.DEBUG) && traversalGateway.isOpen()) {
+                    Util.out(String.format("当前时间%.3f,扩展到:%s,发现od %d个"
+                            , timer.getTimeUsedInSecond(), child, odCount));
+                }
+                search(child);
             }
-            if (Gateway.LogGateway.isOpen(Gateway.LogGateway.DEBUG) && traversalGateway.isOpen()) {
-                Util.out(String.format("当前时间%.3f,扩展到:%s,发现od %d个"
-                    , timer.getTimeUsedInSecond(), child, odCount));
-            }
-            search(child);
-        }
     }
 }
