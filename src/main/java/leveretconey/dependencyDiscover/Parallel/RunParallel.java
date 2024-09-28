@@ -5,7 +5,9 @@ import leveretconey.cocoa.multipleStandard.DFSDiscovererWithMultipleStandard;
 import leveretconey.dependencyDiscover.Data.DataFormatConverter;
 import leveretconey.dependencyDiscover.Data.DataFrame;
 import leveretconey.dependencyDiscover.Dependency.LexicographicalOrderDependency;
+import leveretconey.pre.transformer.Transformer;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -95,15 +97,55 @@ public class RunParallel {
     /**
      * Runs the algorithm with data conversion but without parallelization.
      */
-    public void runWithConvert() throws IOException {
+    public void runWithConvert(Boolean filter) throws IOException {
         for (Path path : paths){
             String stPath = path.toString();
             DataFormatConverter converter = new DataFormatConverter();
+            converter.filter = filter;
             DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(path.toString());
             converter.convert(config);
             DataFrame data = DataFrame.fromCsv(stPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
             writeSolution(discoverer.discover(data, 0.01),stPath.substring(stPath.lastIndexOf("/")));
+        }
+    }
+
+    public void runWithFullConvert(Boolean filter,Boolean dontUseNull) throws IOException {
+        calculateStage1();
+        calculateStage2(filter);
+        calculateStage3(dontUseNull);
+    }
+
+    private void calculateStage1() throws IOException {
+        for (Path path : paths) {
+            String stPath = path.toString();
+            Transformer transformer = new Transformer();
+            transformer.transform(stPath);
+        }
+    }
+    private void calculateStage2(Boolean filter){
+        for (Path path : paths){
+            String stPath = path.toString();
+            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
+            String updatedPath = "data/Stage 1" + raw;
+            DataFormatConverter converter = new DataFormatConverter();
+            converter.filter = filter;
+            DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(updatedPath);
+            config.outputPath = "data/Stage 2" + raw;
+            converter.convert(config);
+        }
+    }
+
+    private void calculateStage3(Boolean dontUseNull){
+        for (Path path : paths){
+            String stPath = path.toString();
+            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
+            String outputPath = "data/Stage 2" + raw;
+            DataFrame data = DataFrame.fromCsv(outputPath);
+            DFSDiscovererWithMultipleStandard discoverer = new DFSDiscovererWithMultipleStandard(G1, 0.01);
+            discoverer.dontUseNull = dontUseNull;
+            var x = discoverer.discover(data, 0.01);
+            writeSolution(x, output + raw);
         }
     }
 
@@ -117,7 +159,9 @@ public class RunParallel {
             System.out.println("TABLE: " + stPath);
             DataFrame data = DataFrame.fromCsv(stPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-            writeSolution(discoverer.discover(data, 0.01),output.toString()+stPath.substring(10));
+            discoverer.dontUseNull = true;
+            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
+            writeSolution(discoverer.discover(data, 0.01),output + raw);
         }
     }
 

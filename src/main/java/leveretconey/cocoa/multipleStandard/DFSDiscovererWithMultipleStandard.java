@@ -49,6 +49,7 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
     public List<String> aod = new ArrayList<>();
     public  int count = 0;
     private final Lock lock = new ReentrantLock();
+    public boolean dontUseNull = false;
 
 
     public enum ValidatorType{
@@ -95,6 +96,7 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
         traversalGateway        = new ComplexTimeGateway();
 //        traversalGateway        = Gateway.AlwaysOpen;
         ispCache                = new DFSISPCacheAttachedToNode(spCache);
+        ispCache.dontUseNull = dontUseNull;
         tree                    = new ALODTree(data,errorRateThresholds);
         odCount                 = 0;
         validators              =new ALODValidator[validatorTypes.length];
@@ -109,6 +111,9 @@ public class DFSDiscovererWithMultipleStandard extends ALODDiscoverer {
             ispCache.updateWorkingNode(node);
             search(node);
         }
+
+        if(data.getColumnCount() == 1)
+            return new ArrayList<>();
 
         Collection<LexicographicalOrderDependency> result = tree.getValidODs();
        //------------------------------------------------------------------------

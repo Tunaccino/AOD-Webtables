@@ -41,7 +41,7 @@ public class TransHTML implements Trans{
             return;
         }
 
-        FileWriter writer = new FileWriter("src/main/resources/csv's" + name + ".csv");
+        FileWriter writer = new FileWriter("data/Stage 1" + name + ".csv");
 
         List<Integer> columnCounts = new ArrayList<>();
         Elements rows = table.select("tr");

@@ -20,6 +20,11 @@ public class TransJSON implements Trans{
 
     };
 
+    /**
+     * Implementation of super function for JSON-Files.
+     * @param data Path of the file that gets transformed.
+     * @throws IOException
+     */
     public void transform(String data) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(data));
         StringBuilder jsonContent = new StringBuilder();
@@ -75,7 +80,7 @@ public class TransJSON implements Trans{
             sb.deleteCharAt(sb.length() - 1).append('\n');
         }
 
-        FileWriter writer = new FileWriter("src/main/resources/csv's" + name + ".csv");
+        FileWriter writer = new FileWriter("data/Stage 1" + name + ".csv");
         writer.write(sb.toString());
         writer.flush();
         writer.close();

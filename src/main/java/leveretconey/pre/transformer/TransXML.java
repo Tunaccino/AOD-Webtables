@@ -68,7 +68,7 @@ public class TransXML implements Trans {
                 }
             }
 
-            try (FileWriter writer = new FileWriter("src/main/resources/csv's" + data.substring(data.lastIndexOf("/"), data.lastIndexOf(".")) + ".csv")) {
+            try (FileWriter writer = new FileWriter("data/Stage 1" + data.substring(data.lastIndexOf("/"), data.lastIndexOf(".")) + ".csv")) {
                 StringBuilder headerBuilder = new StringBuilder();
                 for (String columnName : allColumnNames) {
                     headerBuilder.append("\"").append(columnName).append("\",");

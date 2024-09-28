@@ -1,6 +1,7 @@
 package leveretconey.dependencyDiscover.SortedPartition;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class NewDawn {
     public ArrayList<Integer> left;
@@ -47,30 +48,42 @@ public class NewDawn {
 
         }
 
-        if(partitions[0].nulls[0] || partitions[1].nulls[0] || (three && partitions[2].nulls[0])){
-            if(leftLower == Integer.max(leftLower,(Integer.max(rightLower,otherLower)))){
-                if(three)  beginsLower(leftLower,left,right,other); else beginsLower(leftLower,left,right);
-            }
-            else if(rightLower == Integer.max(leftLower,(Integer.max(rightLower,otherLower)))){
-                if(three) beginsLower(rightLower,right,left,other); else beginsLower(rightLower,right,left);
-            }
-            else {
-                beginsLower(otherLower,other,left,right);
-            }
-        }
-        if(partitions[0].nulls[leftSize] || partitions[1].nulls[rightSize] || (three && partitions[2].nulls[otherSize])){
-            if(leftUpper == Integer.max(leftUpper,(Integer.max(rightUpper,otherUpper)))){
-                if(three) beginsUpper(leftUpper,left,right,other); else beginsUpper(leftUpper,left,right);
-            }
-            else if(rightUpper == Integer.max(leftUpper,(Integer.max(rightUpper,otherUpper)))){
-                if(three) beginsUpper(rightUpper,right,left,other); else beginsUpper(rightUpper,right,left);
-            }
-            else {
-                beginsUpper(otherUpper,other,left,right);
+        int maxUp = (three) ? Math.max(Math.max(leftUpper,rightUpper),otherUpper) : Math.max(leftUpper,rightUpper);
+        int maxLo = (three) ? Math.max(Math.max(leftLower,rightLower),otherLower) : Math.max(leftLower,rightLower);
+        int nul = maxUp + maxLo;
+
+        boolean cancel = (three) ? (right.getLast() <= nul || left.getLast() <= nul || other.getLast()<= nul): (right.getLast() <= nul || left.getLast() <= nul);
+
+        if(!cancel) {
+            if (partitions[0].nulls[0] || partitions[1].nulls[0] || (three && partitions[2].nulls[0])) {
+                if (leftLower == Integer.max(leftLower, (Integer.max(rightLower, otherLower)))) {
+                    if (three) beginsLower(leftLower, left, right, other);
+                    else beginsLower(leftLower, left, right);
+                } else if (rightLower == Integer.max(leftLower, (Integer.max(rightLower, otherLower)))) {
+                    if (three) beginsLower(rightLower, right, left, other);
+                    else beginsLower(rightLower, right, left);
+                } else {
+                    beginsLower(otherLower, other, left, right);
+                }
             }
 
-        }
+            if (partitions[0].nulls[leftSize] || partitions[1].nulls[rightSize] || (three && partitions[2].nulls[otherSize])) {
+                if (leftUpper == Integer.max(leftUpper, (Integer.max(rightUpper, otherUpper)))) {
+                    if (three) beginsUpper(leftUpper, left, right, other);
+                    else beginsUpper(leftUpper, left, right);
+                } else if (rightUpper == Integer.max(leftUpper, (Integer.max(rightUpper, otherUpper)))) {
+                    if (three) beginsUpper(rightUpper, right, left, other);
+                    else beginsUpper(rightUpper, right, left);
+                } else {
+                    beginsUpper(otherUpper, other, left, right);
+                }
 
+            }
+        }else {
+            this.left = new ArrayList<>();
+            this.right = new ArrayList<>();
+            if(three) this.other = new ArrayList<>();
+        }
     }
 
 
@@ -78,7 +91,18 @@ public class NewDawn {
         ArrayList<Integer> left = oldBegins[0];
         ArrayList<Integer> right = oldBegins[1];
         ArrayList<ArrayList<Integer>> begins = new ArrayList<>();
-        left.remove(left.size() - 1);
+        //left.remove(left.size() - 1);
+        int last = left.getLast();
+        left.removeLast();
+        int diff = last - left.getLast();
+        while (diff <= upperCount){
+            left.removeLast();
+            diff = last - left.getLast();
+        }
+        if(diff != upperCount){
+            left.add(left.size()-1,left.getLast()+(diff - upperCount));
+        }
+
         int lastIndex = right.size() - 1;
         if ((right.get(lastIndex) - right.get(lastIndex - 1)) > upperCount)
             beginsUpperBigger(upperCount, right);
@@ -114,9 +138,18 @@ public class NewDawn {
         ArrayList<Integer> left = oldBegins[0];
         ArrayList<Integer> right = oldBegins[1];
         ArrayList<ArrayList<Integer>> begins = new ArrayList<>();
+        int diff = 0;
+        int index = 1;
 
-        left.remove(1);
-        for (int i = 1; i < left.size(); i++)
+        while(left.get(1) <= lowerCount){
+            diff = lowerCount - left.remove(1);
+        }
+        if(diff != 0){
+            left.add(1,left.get(1)-lowerCount);
+            index++;
+        }
+
+        for (int i = index; i < left.size(); i++)
             left.set(i, left.get(i) - lowerCount);
 
         if (right.get(1) > lowerCount)

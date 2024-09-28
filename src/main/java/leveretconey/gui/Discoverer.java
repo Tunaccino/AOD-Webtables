@@ -101,10 +101,8 @@ public class Discoverer extends JFrame{
                 && ((distributedCheckBox.isSelected() && !ipF.getText().trim().isEmpty()) || !distributedCheckBox.isSelected())) {
                     SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
                         @Override
-                        protected Void doInBackground() {
-
-                            RunParallel runner = new RunParallel(inputF.getText(), outputF.getText());
-                            runner.run();
+                        protected Void doInBackground() throws IOException {
+                            taskFinder();
                             return null;
                         }
 
@@ -180,6 +178,10 @@ public class Discoverer extends JFrame{
 
     public void taskFinder() throws IOException {
         if(normalCheckBox.isSelected()){
+            if(otherCheckBox.isSelected()){
+                RunParallel run = new RunParallel(inputF.getText(),outputF.getText());
+                run.runWithFullConvert(filteringCheckBox.isSelected(),true);
+            }
 
         } else if(parallelCheckBox.isSelected()){
 

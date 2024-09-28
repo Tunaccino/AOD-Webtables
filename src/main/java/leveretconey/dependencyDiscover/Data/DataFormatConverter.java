@@ -305,6 +305,9 @@ public class DataFormatConverter {
                     }
 
                 }
+                if(sub == cells.length){
+                    throw new FilterException(config.inputPath);
+                }
                 String[][] newCells = new String[cells.length - sub][];
                 String[] newHeads = new String[convertedDataFrame.heads.length-sub];
                 int j = 0;
@@ -410,7 +413,10 @@ public class DataFormatConverter {
                 j++;
             }
         }
-
+        if(nulls.size() == convertedIntegers.length){
+            Arrays.fill(convertedIntegers,-1);
+            return convertedIntegers;
+        }
         Arrays.sort(Arrays.copyOfRange(indexObjectPairs,0,length-nulls.size()),(p1,p2)->comparator.compare(p1.getValue(),p2.getValue()));
 
         convertedIntegers[indexObjectPairs[0].getKey()]= (nulls.isEmpty()) ? 0 : 1;

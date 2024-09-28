@@ -18,8 +18,9 @@ import leveretconey.util.Statistics;
 import leveretconey.util.TimeStatistics;
 
 public class ImprovedTwoSideSortedPartition{
-    public static boolean g1IncrementalUseStateCompaction =true;
+    public static boolean g1IncrementalUseStateCompaction =false;
     public static int segmentTreeThreshold =32;
+    public boolean dontUseNull = false;
 
     public SortedPartition left;
     public SortedPartition right;
@@ -152,78 +153,80 @@ public class ImprovedTwoSideSortedPartition{
         TimeStatistics.TimeStopper timer = TimeStatistics.start("g1精确计算");
         SortedPartition[] sps = removeNullWithParent(otherSide,expandSide,parentSide);
         long swapViolationCount=0,neverViolationCount=0;
-        int[] rightGroupIndex=sps[0].index2groupIndex;
-        int[] leftGroupIndex=sps[1].index2groupIndex;
+        if(sps[0].begins.size() > 1 && sps[1].begins.size() > 1 && sps[2].begins.size() > 1) {
+            int[] rightGroupIndex = sps[0].index2groupIndex;
+            int[] leftGroupIndex = sps[1].index2groupIndex;
 
-        int tupleCount=sps[1].index2groupIndex.length;
-        int[] index2convertedRight;
-        int[] groupLastRightGroup;
-        int[] groupLastConvertedValue = new int[0];
-        if(g1IncrementalUseStateCompaction) {
-            index2convertedRight = new int[tupleCount];
-            groupLastRightGroup = new int[sps[2].begins.size() - 1];
-            groupLastConvertedValue = new int[sps[2].begins.size() - 1];
-            Arrays.fill(groupLastRightGroup, -1);
-            Arrays.fill(groupLastConvertedValue, -1);
-            for (int i = 0; i < tupleCount; i++) {
-                int index = sps[0].indexes[i];
-                int leftGroup = sps[2].index2groupIndex[index];
-                int rightGroup = sps[0].index2groupIndex[index];
-                if (rightGroup > groupLastRightGroup[leftGroup]) {
-                    groupLastConvertedValue[leftGroup]++;
-                    groupLastRightGroup[leftGroup] = rightGroup;
+            int tupleCount = sps[1].index2groupIndex.length;
+            int[] index2convertedRight;
+            int[] groupLastRightGroup;
+            int[] groupLastConvertedValue = new int[0];
+            if (g1IncrementalUseStateCompaction) {
+                index2convertedRight = new int[tupleCount];
+                groupLastRightGroup = new int[sps[2].begins.size() - 1];
+                groupLastConvertedValue = new int[sps[2].begins.size() - 1];
+                Arrays.fill(groupLastRightGroup, -1);
+                Arrays.fill(groupLastConvertedValue, -1);
+                for (int i = 0; i < tupleCount; i++) {
+                    int index = sps[0].indexes[i];
+                    int leftGroup = sps[2].index2groupIndex[index];
+                    int rightGroup = sps[0].index2groupIndex[index];
+                    if (rightGroup > groupLastRightGroup[leftGroup]) {
+                        groupLastConvertedValue[leftGroup]++;
+                        groupLastRightGroup[leftGroup] = rightGroup;
+                    }
+                    index2convertedRight[index] = groupLastConvertedValue[leftGroup];
                 }
-                index2convertedRight[index] = groupLastConvertedValue[leftGroup];
+            } else {
+                index2convertedRight = sps[0].index2groupIndex;
             }
-        }else {
-            index2convertedRight=sps[0].index2groupIndex;
-        }
 
-        for(int beginPointer = 0; beginPointer< sps[2].begins.size()-1; beginPointer++) {
-            int groupBegin = sps[2].begins.get(beginPointer);
-            int groupEnd = sps[2].begins.get(beginPointer + 1);
-            int expandedFirstGroup=sps[1].index2groupIndex[sps[1].indexes[groupBegin]];
-            int expandedLastGroup=sps[1].index2groupIndex[sps[1].indexes[groupEnd-1]];
-            if (expandedFirstGroup==expandedLastGroup){
-                continue;
-            }
-            int groupLength=groupEnd-groupBegin;
-            if (groupLength>= segmentTreeThreshold) {
-                int rangeHigh;
-                if (g1IncrementalUseStateCompaction){
-                    rangeHigh=groupLastConvertedValue[beginPointer];
-                }else {
-                    rangeHigh = sps[0].begins.size();
+            for (int beginPointer = 0; beginPointer < sps[2].begins.size() - 1; beginPointer++) {
+                int groupBegin = sps[2].begins.get(beginPointer);
+                int groupEnd = sps[2].begins.get(beginPointer + 1);
+                int expandedFirstGroup = sps[1].index2groupIndex[sps[1].indexes[groupBegin]];
+                int expandedLastGroup = sps[1].index2groupIndex[sps[1].indexes[groupEnd - 1]];
+                if (expandedFirstGroup == expandedLastGroup) {
+                    continue;
                 }
-                SegmentTreeForG1 tree = new SegmentTreeForG1(0,rangeHigh);
-                int[] int2Count=new int[rangeHigh+1];
-                for (int subBeginPointer = expandedFirstGroup; subBeginPointer <= expandedLastGroup; subBeginPointer++) {
-                    int subGroupBegin = sps[1].begins.get(subBeginPointer);
-                    int subGroupEnd = sps[1].begins.get(subBeginPointer + 1);
-                    for(int i=subGroupBegin;i<subGroupEnd;i++){
-                        int right=index2convertedRight[sps[1].indexes[i]];
-                        int neverViolationIncrease=tree.query(0,right-1);
-                        neverViolationCount+=neverViolationIncrease;
-                        swapViolationCount+=(subGroupBegin-groupBegin-int2Count[right]-neverViolationIncrease);
+                int groupLength = groupEnd - groupBegin;
+                if (groupLength >= segmentTreeThreshold) {
+                    int rangeHigh;
+                    if (g1IncrementalUseStateCompaction) {
+                        rangeHigh = groupLastConvertedValue[beginPointer];
+                    } else {
+                        rangeHigh = sps[0].begins.size();
                     }
-                    for(int i=subGroupBegin;i<subGroupEnd;i++){
-                        int right=index2convertedRight[sps[1].indexes[i]];
-                        tree.insert(right);
-                        int2Count[right]++;
-                    }
-                }
-            }else {
-                for (int i=groupBegin+1;i<groupEnd;i++){
-                    int indexi=sps[1].indexes[i];
-                    for(int j=groupBegin;j<i;j++){
-                        int indexj=sps[1].indexes[j];
-                        if (leftGroupIndex[indexi]==leftGroupIndex[indexj]){
-                            break;
+                    SegmentTreeForG1 tree = new SegmentTreeForG1(0, rangeHigh);
+                    int[] int2Count = new int[rangeHigh + 1];
+                    for (int subBeginPointer = expandedFirstGroup; subBeginPointer <= expandedLastGroup; subBeginPointer++) {
+                        int subGroupBegin = sps[1].begins.get(subBeginPointer);
+                        int subGroupEnd = sps[1].begins.get(subBeginPointer + 1);
+                        for (int i = subGroupBegin; i < subGroupEnd; i++) {
+                            int right = index2convertedRight[sps[1].indexes[i]];
+                            int neverViolationIncrease = tree.query(0, right - 1);
+                            neverViolationCount += neverViolationIncrease;
+                            swapViolationCount += (subGroupBegin - groupBegin - int2Count[right] - neverViolationIncrease);
                         }
-                        if (rightGroupIndex[indexi]>rightGroupIndex[indexj]){
-                            neverViolationCount++;
-                        }else if (rightGroupIndex[indexi]<rightGroupIndex[indexj]){
-                            swapViolationCount++;
+                        for (int i = subGroupBegin; i < subGroupEnd; i++) {
+                            int right = index2convertedRight[sps[1].indexes[i]];
+                            tree.insert(right);
+                            int2Count[right]++;
+                        }
+                    }
+                } else {
+                    for (int i = groupBegin + 1; i < groupEnd; i++) {
+                        int indexi = sps[1].indexes[i];
+                        for (int j = groupBegin; j < i; j++) {
+                            int indexj = sps[1].indexes[j];
+                            if (leftGroupIndex[indexi] == leftGroupIndex[indexj]) {
+                                break;
+                            }
+                            if (rightGroupIndex[indexi] > rightGroupIndex[indexj]) {
+                                neverViolationCount++;
+                            } else if (rightGroupIndex[indexi] < rightGroupIndex[indexj]) {
+                                swapViolationCount++;
+                            }
                         }
                     }
                 }
@@ -238,26 +241,28 @@ public class ImprovedTwoSideSortedPartition{
         SortedPartition[] sps = removeNull(left,right);
         TimeStatistics.TimeStopper timer = TimeStatistics.start("g1精确计算");
         long swapViolationCount=0,neverViolationCount=0;
-        int[] row2RightGroupIndex= sps[1].index2groupIndex;
-        SegmentTreeForG1 tree=new SegmentTreeForG1(0, sps[1].begins.size()-2);
-        int[] globalInt2Count=new int[sps[1].begins.size()-1];
+        if(sps[0].begins.size() > 1 && sps[1].begins.size() > 1) {
+            int[] row2RightGroupIndex = sps[1].index2groupIndex;
+            SegmentTreeForG1 tree = new SegmentTreeForG1(0, sps[1].begins.size() - 2);
+            int[] globalInt2Count = new int[sps[1].begins.size() - 1];
 
-        for(int beginPointer = 0; beginPointer< sps[0].begins.size()-1; beginPointer++) {
+            for (int beginPointer = 0; beginPointer < sps[0].begins.size() - 1; beginPointer++) {
 
-            int groupBegin = sps[0].begins.get(beginPointer);
-            int groupEnd = sps[0].begins.get(beginPointer + 1);
+                int groupBegin = sps[0].begins.get(beginPointer);
+                int groupEnd = sps[0].begins.get(beginPointer + 1);
 
-            for (int i = groupBegin ; i < groupEnd; i++) {
-                int rightGroupIndex=row2RightGroupIndex[sps[0].indexes[i]];
-                int swapIncrease=tree.query(rightGroupIndex+1,Integer.MAX_VALUE);
-                swapViolationCount += swapIncrease;
-                neverViolationCount += (groupBegin-swapIncrease-globalInt2Count[rightGroupIndex]);
-            }
+                for (int i = groupBegin; i < groupEnd; i++) {
+                    int rightGroupIndex = row2RightGroupIndex[sps[0].indexes[i]];
+                    int swapIncrease = tree.query(rightGroupIndex + 1, Integer.MAX_VALUE);
+                    swapViolationCount += swapIncrease;
+                    neverViolationCount += (groupBegin - swapIncrease - globalInt2Count[rightGroupIndex]);
+                }
 
-            for (int i = groupBegin ; i < groupEnd; i++) {
-                int rightGroupIndex=row2RightGroupIndex[sps[0].indexes[i]];
-                tree.insert(rightGroupIndex);
-                globalInt2Count[rightGroupIndex]++;
+                for (int i = groupBegin; i < groupEnd; i++) {
+                    int rightGroupIndex = row2RightGroupIndex[sps[0].indexes[i]];
+                    tree.insert(rightGroupIndex);
+                    globalInt2Count[rightGroupIndex]++;
+                }
             }
         }
         timer.stop();
@@ -266,25 +271,27 @@ public class ImprovedTwoSideSortedPartition{
 
     private long validateSplitViolation(){
         TimeStatistics.TimeStopper timer = TimeStatistics.start("g1精确计算");
-        SortedPartition[] sps = removeNull(left,right);
-        int[] row2RightGroupIndex= sps[1].index2groupIndex;
         long splitViolationCount=0;
-        for(int beginPointer = 0; beginPointer< sps[0].begins.size()-1; beginPointer++) {
+        SortedPartition[] sps = removeNull(left,right);
+        if(sps[0].begins.size() > 1 && sps[1].begins.size() > 1) {
+            int[] row2RightGroupIndex = sps[1].index2groupIndex;
+            for (int beginPointer = 0; beginPointer < sps[0].begins.size() - 1; beginPointer++) {
 
-            int groupBegin = sps[0].begins.get(beginPointer);
-            int groupEnd = sps[0].begins.get(beginPointer + 1);
-            int groupLength=groupEnd-groupBegin;
-            HashMap<Integer,Integer> groupInt2count=new HashMap<>();
+                int groupBegin = sps[0].begins.get(beginPointer);
+                int groupEnd = sps[0].begins.get(beginPointer + 1);
+                int groupLength = groupEnd - groupBegin;
+                HashMap<Integer, Integer> groupInt2count = new HashMap<>();
 
-            for (int i = groupBegin ; i < groupEnd; i++) {
-                int rightGroupIndex=row2RightGroupIndex[sps[0].indexes[i]];
-                groupInt2count.put(rightGroupIndex,groupInt2count.getOrDefault(rightGroupIndex,0)+1);
+                for (int i = groupBegin; i < groupEnd; i++) {
+                    int rightGroupIndex = row2RightGroupIndex[sps[0].indexes[i]];
+                    groupInt2count.put(rightGroupIndex, groupInt2count.getOrDefault(rightGroupIndex, 0) + 1);
+                }
+                for (int count : groupInt2count.values()) {
+                    splitViolationCount += (long) count * (groupLength - count);
+                }
             }
-            for (int count : groupInt2count.values()) {
-                splitViolationCount+=(long)count * (groupLength-count);
-            }
+            timer.stop();
         }
-        timer.stop();
         return splitViolationCount;
     }
 
@@ -300,8 +307,9 @@ public class ImprovedTwoSideSortedPartition{
                 nullCount++;
             }
         }
+        System.out.println(dontUseNull);
 
-        if(nullCount == 0)
+        if(nullCount == 0 || dontUseNull)
             return new SortedPartition[]{left,right};
 
         int[] indexesL = new int[left.indexes.length-nullCount];
@@ -376,6 +384,7 @@ public class ImprovedTwoSideSortedPartition{
 
         if(nullCount == 0)
             return new SortedPartition[]{left,right,other};
+
 
         int[] indexesL = new int[left.indexes.length-nullCount];
         int[] indexesR = new int[right.indexes.length-nullCount];
