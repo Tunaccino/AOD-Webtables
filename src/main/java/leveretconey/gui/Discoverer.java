@@ -1,6 +1,7 @@
 package leveretconey.gui;
 
 import leveretconey.dependencyDiscover.Parallel.RunParallel;
+import leveretconey.dependencyDiscover.Parallel.distributed.Client.AODClient;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -203,15 +204,16 @@ public class Discoverer extends JFrame{
                 run.runParallel(!nullCheckBox.isSelected());
             }
         } else if(distributedCheckBox.isSelected()){
+            AODClient client = new AODClient();
             if(otherCheckBox.isSelected()){
-                run.runWithFullConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
+                client.runWithFullConvert(ipF.getText(),inputF.getText(),outputF.getText(),filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
                 deleteFolderContentsOnly(new File("data/Stage 1"));
                 deleteFolderContentsOnly(new File("data/Stage 2"));
             }else if(CSVCheckBox.isSelected()){
-                run.runWithConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
+                client.runConvert(ipF.getText(),inputF.getText(),outputF.getText(),filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
                 deleteFolderContentsOnly(new File("data/Stage 2"));
             }else {
-                run.run(!nullCheckBox.isSelected());
+                client.run(ipF.getText(),inputF.getText(),outputF.getText(),!nullCheckBox.isSelected());
             }
         }
     }
