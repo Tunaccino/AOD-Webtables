@@ -197,10 +197,10 @@ public class Discoverer extends JFrame{
                 deleteFolderContentsOnly(new File("data/Stage 1"));
                 deleteFolderContentsOnly(new File("data/Stage 2"));
             }else if(CSVCheckBox.isSelected()){
-                run.runWithConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
+                run.runParallelWithConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
                 deleteFolderContentsOnly(new File("data/Stage 2"));
             }else {
-                run.run(!nullCheckBox.isSelected());
+                run.runParallel(!nullCheckBox.isSelected());
             }
         } else if(distributedCheckBox.isSelected()){
             if(otherCheckBox.isSelected()){

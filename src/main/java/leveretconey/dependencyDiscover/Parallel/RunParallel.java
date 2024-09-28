@@ -197,7 +197,7 @@ public class RunParallel {
     /**
      * Runs the algorithm with data conversion and with parallelization.
      */
-    public void runParallelWithConvert() {
+    public void runParallelWithConvert(Boolean filter, Boolean dontUseNull) {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         try {
@@ -206,13 +206,17 @@ public class RunParallel {
             for (Path path : paths) {
                 String stPath = path.toString();
                 Future<Void> future = executor.submit(() -> {
+                    String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
                     DataFormatConverter converter = new DataFormatConverter();
+                    converter.filter = filter;
                     DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(path.toString());
+                    config.outputPath = "data/Stage 2" + raw;
                     converter.convert(config);
-                    DataFrame data = DataFrame.fromCsv(stPath);
+                    DataFrame data = DataFrame.fromCsv(config.outputPath);
                     DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-                    collections.add(new Pair<>(discoverer.discover(data,0.01),path.toString()));
-                    //writeSolution(discoverer.discover(data, 0.01),stPath.substring(stPath.lastIndexOf("/")));
+                    discoverer.dontUseNull = dontUseNull;
+                    writeSolution(discoverer.discover(data, 0.01),output + raw);
+
                     return null;
                 });
 
@@ -270,7 +274,7 @@ public class RunParallel {
     /**
      *  Runs the algorithm without data conversion but with parallelization.
      */
-    public void runParallel() {
+    public void runParallel(Boolean dontUseNull) {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         try {
@@ -281,9 +285,10 @@ public class RunParallel {
                 Future<Void> future = executor.submit(() -> {
                     DataFrame data = DataFrame.fromCsv(stPath);
                     DFSDiscovererWithMultipleStandard discoverer = discovererThreadLocal.get();
+                    discoverer.dontUseNull = dontUseNull;
                     var x = discoverer.discover(data, 0.01);
-                    System.out.println(stPath + ":" + x.toString());
-                    writeSolution(x, output.toString() + stPath.substring(10));
+                    String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
+                    writeSolution(x, output + raw);
                     return null;
                 });
 
