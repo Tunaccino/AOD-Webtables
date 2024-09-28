@@ -456,7 +456,7 @@ public class RunParallel {
         }
     }*/
 
-    private void writeSolution(Collection<LexicographicalOrderDependency> discoveredLods, String directory) {
+    public void writeSolution(Collection<LexicographicalOrderDependency> discoveredLods, String directory) {
         String tableName = directory.substring(directory.lastIndexOf("/"));
         directory = directory.substring(0,directory.lastIndexOf("/"));
 
