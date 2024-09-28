@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class Discoverer extends JFrame{
     private JPanel contentPane;
@@ -101,7 +102,7 @@ public class Discoverer extends JFrame{
                 && ((distributedCheckBox.isSelected() && !ipF.getText().trim().isEmpty()) || !distributedCheckBox.isSelected())) {
                     SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
                         @Override
-                        protected Void doInBackground() throws IOException {
+                        protected Void doInBackground() throws IOException, ExecutionException, InterruptedException {
                             taskFinder();
                             return null;
                         }
@@ -176,19 +177,42 @@ public class Discoverer extends JFrame{
         });
     }
 
-    public void taskFinder() throws IOException {
+    public void taskFinder() throws IOException, ExecutionException, InterruptedException {
+        RunParallel run = new RunParallel(inputF.getText(),outputF.getText());
         if(normalCheckBox.isSelected()){
             if(otherCheckBox.isSelected()){
-                RunParallel run = new RunParallel(inputF.getText(),outputF.getText());
                 run.runWithFullConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
                 deleteFolderContentsOnly(new File("data/Stage 1"));
                 deleteFolderContentsOnly(new File("data/Stage 2"));
+            }else if(CSVCheckBox.isSelected()){
+                run.runWithConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
+                deleteFolderContentsOnly(new File("data/Stage 2"));
+            }else {
+                run.run(!nullCheckBox.isSelected());
             }
 
         } else if(parallelCheckBox.isSelected()){
-
+            if(otherCheckBox.isSelected()){
+                run.runParallelWithFullConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
+                deleteFolderContentsOnly(new File("data/Stage 1"));
+                deleteFolderContentsOnly(new File("data/Stage 2"));
+            }else if(CSVCheckBox.isSelected()){
+                run.runWithConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
+                deleteFolderContentsOnly(new File("data/Stage 2"));
+            }else {
+                run.run(!nullCheckBox.isSelected());
+            }
         } else if(distributedCheckBox.isSelected()){
-
+            if(otherCheckBox.isSelected()){
+                run.runWithFullConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
+                deleteFolderContentsOnly(new File("data/Stage 1"));
+                deleteFolderContentsOnly(new File("data/Stage 2"));
+            }else if(CSVCheckBox.isSelected()){
+                run.runWithConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
+                deleteFolderContentsOnly(new File("data/Stage 2"));
+            }else {
+                run.run(!nullCheckBox.isSelected());
+            }
         }
     }
 

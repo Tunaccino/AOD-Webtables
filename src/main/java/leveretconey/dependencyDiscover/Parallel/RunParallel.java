@@ -1,5 +1,6 @@
 package leveretconey.dependencyDiscover.Parallel;
 
+import javafx.beans.binding.BooleanExpression;
 import javafx.util.Pair;
 import leveretconey.cocoa.multipleStandard.DFSDiscovererWithMultipleStandard;
 import leveretconey.dependencyDiscover.Data.DataFormatConverter;
@@ -17,10 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -97,16 +95,19 @@ public class RunParallel {
     /**
      * Runs the algorithm with data conversion but without parallelization.
      */
-    public void runWithConvert(Boolean filter) throws IOException {
+    public void runWithConvert(Boolean filter, Boolean dontUseNull) throws IOException {
         for (Path path : paths){
             String stPath = path.toString();
+            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
             DataFormatConverter converter = new DataFormatConverter();
             converter.filter = filter;
             DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(path.toString());
+            config.outputPath = "data/Stage 2" + raw;
             converter.convert(config);
-            DataFrame data = DataFrame.fromCsv(stPath);
+            DataFrame data = DataFrame.fromCsv(config.outputPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-            writeSolution(discoverer.discover(data, 0.01),stPath.substring(stPath.lastIndexOf("/")));
+            discoverer.dontUseNull = dontUseNull;
+            writeSolution(discoverer.discover(data, 0.01),output + raw);
         }
     }
 
@@ -152,17 +153,45 @@ public class RunParallel {
     /**
      * Runs the algorithm without data conversion and without parallelization.
      */
-    public void run(){
+    public void run(Boolean dontUseNull){
         int index = 0;
         for (Path path : paths){
             String stPath = path.toString();
             System.out.println("TABLE: " + stPath);
             DataFrame data = DataFrame.fromCsv(stPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-            discoverer.dontUseNull = true;
+            discoverer.dontUseNull = dontUseNull;
             String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
             writeSolution(discoverer.discover(data, 0.01),output + raw);
         }
+    }
+
+    public void runParallelWithFullConvert(Boolean filter, Boolean dontUseNull) throws ExecutionException, InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        try{
+        Future<?> stage1 = executor.submit(() ->{
+            try {
+                calculateStage1();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        stage1.get();
+
+        Future<?> stage2 = executor.submit(()->{
+            calculateStage2(filter);
+        });
+        stage2.get();
+
+        Future<?> stage3 = executor.submit(() -> {
+           calculateStage3(dontUseNull);
+        });
+        stage3.get();
+
+    } finally {
+        executor.shutdown();
+    }
     }
 
     /**
