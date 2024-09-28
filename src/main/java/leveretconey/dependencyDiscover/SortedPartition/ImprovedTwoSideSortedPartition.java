@@ -307,7 +307,6 @@ public class ImprovedTwoSideSortedPartition{
                 nullCount++;
             }
         }
-        System.out.println(dontUseNull);
 
         if(nullCount == 0 || dontUseNull)
             return new SortedPartition[]{left,right};
@@ -382,7 +381,7 @@ public class ImprovedTwoSideSortedPartition{
             }
         }
 
-        if(nullCount == 0)
+        if(nullCount == 0 || dontUseNull)
             return new SortedPartition[]{left,right,other};
 
 
