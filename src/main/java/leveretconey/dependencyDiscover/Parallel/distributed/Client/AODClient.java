@@ -13,6 +13,7 @@ import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AODClient {
@@ -63,7 +64,7 @@ public class AODClient {
                 }
 
                 try {
-                    String name = pair.getValue().substring(11);
+                    String name = pair.getValue().substring(12);
                     Files.write(Paths.get(output +"/"+ name),lines);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -89,7 +90,7 @@ public class AODClient {
 
             Thread localProcessingThread = new Thread(() ->{
                 RunParallel runner = new RunParallel(filesUpper, output);
-                runner.runParallel(dontUseNull);
+                runner.runParallelWithConvert(filter,dontUseNull);
 
 
             });
@@ -143,7 +144,13 @@ public class AODClient {
 
             Thread localProcessingThread = new Thread(() ->{
                 RunParallel runner = new RunParallel(filesUpper, output);
-                runner.runParallel(dontUseNull);
+                try {
+                    runner.runParallelWithFullConvert(filter,dontUseNull);
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
 
 
             });
