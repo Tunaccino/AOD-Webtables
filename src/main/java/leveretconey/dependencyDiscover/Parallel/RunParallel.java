@@ -9,7 +9,9 @@ import leveretconey.dependencyDiscover.Dependency.LexicographicalOrderDependency
 import leveretconey.pre.transformer.Transformer;
 
 import javax.swing.*;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,6 +23,8 @@ import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.nio.file.StandardOpenOption;
+
 
 import static leveretconey.cocoa.multipleStandard.DFSDiscovererWithMultipleStandard.ValidatorType.G1;
 
@@ -433,12 +437,12 @@ public class RunParallel {
     }
 
 
-
-    /**
+/*
+    *//**
      * writes the found OD's to the location specified.
      * @param discoveredLods List of all found OD's for a certain Webtable.
      * @param location Location where the solution is written to.
-     */
+     *//*
     private void writeSolution(Collection<LexicographicalOrderDependency> discoveredLods, String  location){
         ArrayList<String> lines = new ArrayList<>();
         for(LexicographicalOrderDependency lod : discoveredLods){
@@ -450,5 +454,43 @@ public class RunParallel {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }*/
+
+    private void writeSolution(Collection<LexicographicalOrderDependency> discoveredLods, String directory) {
+        String tableName = directory.substring(directory.lastIndexOf("/"));
+        directory = directory.substring(0,directory.lastIndexOf("/"));
+
+        File dir = new File(directory);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        String fileName = "lod_report.txt";
+        File file = new File(dir, fileName);
+        boolean fileExists = file.exists();
+
+        StringBuilder builder = new StringBuilder();
+
+        if (!fileExists) {
+            builder.append("==== Lexicographical Order Dependencies Report ====\n");
+            builder.append("Generated on: ").append(java.time.LocalDateTime.now()).append("\n");
+            builder.append("===================================================\n");
+        }
+
+
+        builder.append("\n---- Webtable: ").append(tableName).append(" ----\n");
+
+
+        for (LexicographicalOrderDependency lod : discoveredLods) {
+            builder.append(lod.toString()).append("\n");
+        }
+
+        try (FileWriter fileWriter = new FileWriter(file, true);
+             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+            bufferedWriter.write(builder.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+
 }
