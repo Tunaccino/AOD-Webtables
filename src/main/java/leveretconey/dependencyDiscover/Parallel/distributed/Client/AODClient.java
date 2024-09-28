@@ -33,6 +33,7 @@ public class AODClient {
             File[] filesLower = Arrays.copyOfRange(files,0,files.length/2);
             File[] filesUpper = Arrays.copyOfRange(files,files.length/2,files.length);
             AtomicReference<ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>>> collections = new AtomicReference<>(new ArrayList<>());
+            RunParallel run = new RunParallel(filesUpper, output);
 
             Thread localProcessingThread = new Thread(() ->{
                 RunParallel runner = new RunParallel(filesUpper, output);
@@ -58,7 +59,7 @@ public class AODClient {
             remoteProcessingThread.join();
 
             for (Pair<Collection<LexicographicalOrderDependency>,String> pair : collections.get()){
-                ArrayList<String> lines = new ArrayList<>();
+                /*ArrayList<String> lines = new ArrayList<>();
                 for (LexicographicalOrderDependency lod : pair.getKey()){
                     lines.add(lod.toString());
                 }
@@ -68,7 +69,9 @@ public class AODClient {
                     Files.write(Paths.get(output +"/"+ name),lines);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                }
+                }*/
+                String name = pair.getValue().substring(pair.getValue().lastIndexOf("/"));
+                run.writeSolution(pair.getKey(),output +"/" +name);
             }
 
             System.out.println("Done calculating OD's!");
@@ -87,6 +90,7 @@ public class AODClient {
             File[] filesLower = Arrays.copyOfRange(files,0,files.length/2);
             File[] filesUpper = Arrays.copyOfRange(files,files.length/2,files.length);
             AtomicReference<ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>>> collections = new AtomicReference<>(new ArrayList<>());
+            RunParallel run = new RunParallel(filesUpper, output);
 
             Thread localProcessingThread = new Thread(() ->{
                 RunParallel runner = new RunParallel(filesUpper, output);
@@ -112,7 +116,7 @@ public class AODClient {
             remoteProcessingThread.join();
 
             for (Pair<Collection<LexicographicalOrderDependency>,String> pair : collections.get()){
-                ArrayList<String> lines = new ArrayList<>();
+              /*  ArrayList<String> lines = new ArrayList<>();
                 for (LexicographicalOrderDependency lod : pair.getKey()){
                     lines.add(lod.toString());
                 }
@@ -122,7 +126,9 @@ public class AODClient {
                     Files.write(Paths.get(output +"/"+ name),lines);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                }
+                }*/
+                String name = pair.getValue().substring(pair.getValue().lastIndexOf("/"));
+                run.writeSolution(pair.getKey(),output +"/" +name);
             }
 
             System.out.println("Done calculating OD's!");
@@ -141,6 +147,7 @@ public class AODClient {
             File[] filesLower = Arrays.copyOfRange(files,0,files.length/2);
             File[] filesUpper = Arrays.copyOfRange(files,files.length/2,files.length);
             AtomicReference<ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>>> collections = new AtomicReference<>(new ArrayList<>());
+            RunParallel run = new RunParallel(filesUpper, output);
 
             Thread localProcessingThread = new Thread(() ->{
                 RunParallel runner = new RunParallel(filesUpper, output);
@@ -172,7 +179,7 @@ public class AODClient {
             remoteProcessingThread.join();
 
             for (Pair<Collection<LexicographicalOrderDependency>,String> pair : collections.get()){
-                ArrayList<String> lines = new ArrayList<>();
+                /*ArrayList<String> lines = new ArrayList<>();
                 for (LexicographicalOrderDependency lod : pair.getKey()){
                     lines.add(lod.toString());
                 }
@@ -182,8 +189,12 @@ public class AODClient {
                     Files.write(Paths.get(output +"/"+ name),lines);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                }
+                }*/
+                String name = pair.getValue().substring(pair.getValue().lastIndexOf("/"));
+                run.writeSolution(pair.getKey(),output +"/" +name);
             }
+
+
 
             System.out.println("Done calculating OD's!");
         }catch (Exception e){
