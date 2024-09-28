@@ -150,6 +150,18 @@ public class RunParallel {
         }
     }
 
+    private void calculateStage3Remote(Boolean dontUseNull){
+        for (Path path : paths){
+            String stPath = path.toString();
+            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
+            String outputPath = "data/Stage 2" + raw;
+            DataFrame data = DataFrame.fromCsv(outputPath);
+            DFSDiscovererWithMultipleStandard discoverer = new DFSDiscovererWithMultipleStandard(G1, 0.01);
+            discoverer.dontUseNull = dontUseNull;
+            collections.add(new Pair<>(discoverer.discover(data,0.01),outputPath));
+        }
+    }
+
     /**
      * Runs the algorithm without data conversion and without parallelization.
      */
@@ -239,7 +251,7 @@ public class RunParallel {
     /**
      *  Runs the algorithm without data conversion but with parallelization.
      */
-    public void runParallelRemote() {
+    public void runParallelRemote(Boolean dontUseNull) {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         try {
@@ -249,9 +261,9 @@ public class RunParallel {
                 String stPath = path.toString();
                 Future<Void> future = executor.submit(() -> {
                     DataFrame data = DataFrame.fromCsv(stPath);
-                    DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
+                    DFSDiscovererWithMultipleStandard discoverer = discovererThreadLocal.get();
+                    discoverer.dontUseNull = dontUseNull;
                     collections.add(new Pair<>(discoverer.discover(data,0.01),path.toString()));
-                    //writeSolution(discoverer.discover(data, 0.01),output.toString()+stPath.substring(stPath.lastIndexOf("/")));
                     return null;
                 });
 
@@ -270,6 +282,74 @@ public class RunParallel {
             executor.shutdown();
         }
     }
+
+    public void runParallelRemoteWithConvert(Boolean filter, Boolean dontUseNull) {
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        try {
+            List<Future<Void>> futures = new ArrayList<>();
+
+            for (Path path : paths) {
+                String stPath = path.toString();
+                Future<Void> future = executor.submit(() -> {
+                    String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
+                    DataFormatConverter converter = new DataFormatConverter();
+                    converter.filter = filter;
+                    DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(path.toString());
+                    config.outputPath = "data/Stage 2" + raw;
+                    converter.convert(config);
+                    DataFrame data = DataFrame.fromCsv(config.outputPath);
+                    DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
+                    discoverer.dontUseNull = dontUseNull;
+                    collections.add(new Pair<>(discoverer.discover(data,0.01), config.outputPath));
+
+                    return null;
+                });
+
+                futures.add(future);
+            }
+
+            for (Future<Void> future : futures) {
+                try {
+                    future.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    public void runParallelRemoteWithFullConvert(Boolean filter, Boolean dontUseNull) throws ExecutionException, InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+        try{
+            Future<?> stage1 = executor.submit(() ->{
+                try {
+                    calculateStage1();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            stage1.get();
+
+            Future<?> stage2 = executor.submit(()->{
+                calculateStage2(filter);
+            });
+            stage2.get();
+
+            Future<?> stage3 = executor.submit(() -> {
+                calculateStage3Remote(dontUseNull);
+            });
+            stage3.get();
+
+        } finally {
+            executor.shutdown();
+        }
+    }
+
 
     /**
      *  Runs the algorithm without data conversion but with parallelization.

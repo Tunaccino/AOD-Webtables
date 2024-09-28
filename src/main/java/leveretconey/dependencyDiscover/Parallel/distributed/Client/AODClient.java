@@ -44,7 +44,7 @@ public class AODClient {
                 try{
                     collections.set(service.processWebTable(Arrays.stream(filesLower)
                             .map(File::getPath)
-                            .toArray(String[]::new), output));
+                            .toArray(String[]::new), output,dontUseNull));
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -96,9 +96,9 @@ public class AODClient {
 
             Thread remoteProcessingThread = new Thread(() -> {
                 try{
-                    collections.set(service.processWebTable(Arrays.stream(filesLower)
+                    collections.set(service.processWebTableWithConvert(Arrays.stream(filesLower)
                             .map(File::getPath)
-                            .toArray(String[]::new), output));
+                            .toArray(String[]::new), output,filter,dontUseNull));
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -150,9 +150,9 @@ public class AODClient {
 
             Thread remoteProcessingThread = new Thread(() -> {
                 try{
-                    collections.set(service.processWebTable(Arrays.stream(filesLower)
+                    collections.set(service.processWebTableWithFullConvert(Arrays.stream(filesLower)
                             .map(File::getPath)
-                            .toArray(String[]::new), output));
+                            .toArray(String[]::new), output,filter,dontUseNull));
                 }catch (Exception e){
                     e.printStackTrace();
                 }

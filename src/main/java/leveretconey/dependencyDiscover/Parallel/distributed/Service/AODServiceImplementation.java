@@ -11,6 +11,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 
 public class AODServiceImplementation extends UnicastRemoteObject implements AODService {
     protected AODServiceImplementation() throws RemoteException{
@@ -19,7 +20,7 @@ public class AODServiceImplementation extends UnicastRemoteObject implements AOD
 
 
     @Override
-    public ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>> processWebTable(String[] input, String output) throws RemoteException {
+    public ArrayList<Pair<Collection<LexicographicalOrderDependency>,String>> processWebTable(String[] input, String output, Boolean dontUseNull) throws RemoteException {
         if (input == null || input.length == 0) {
             System.out.println("Received an empty or null file path array");
             return null;
@@ -32,7 +33,45 @@ public class AODServiceImplementation extends UnicastRemoteObject implements AOD
         }
 
         RunParallel runner = new RunParallel(input,output);
-        runner.runParallelRemote();
+        runner.runParallelRemote(dontUseNull);
+
+        return runner.collections;
+    }
+
+    @Override
+    public ArrayList<Pair<Collection<LexicographicalOrderDependency>, String>> processWebTableWithConvert(String[] input, String output, Boolean filtering,Boolean dontUseNull) throws RemoteException {
+        if (input == null || input.length == 0) {
+            System.out.println("Received an empty or null file path array");
+            return null;
+        }
+        for (String path : input) {
+            File file = new File(path);
+            if (!file.exists()) {
+                System.out.println("File does not exist: " + path);
+            }
+        }
+
+        RunParallel runner = new RunParallel(input,output);
+        runner.runParallelRemoteWithConvert(filtering,dontUseNull);
+
+        return runner.collections;
+    }
+
+    @Override
+    public ArrayList<Pair<Collection<LexicographicalOrderDependency>, String>> processWebTableWithFullConvert(String[] input, String output,Boolean filtering, Boolean dontUseNull) throws RemoteException, ExecutionException, InterruptedException {
+        if (input == null || input.length == 0) {
+            System.out.println("Received an empty or null file path array");
+            return null;
+        }
+        for (String path : input) {
+            File file = new File(path);
+            if (!file.exists()) {
+                System.out.println("File does not exist: " + path);
+            }
+        }
+
+        RunParallel runner = new RunParallel(input,output);
+        runner.runParallelRemoteWithFullConvert(filtering,dontUseNull);
 
         return runner.collections;
     }
