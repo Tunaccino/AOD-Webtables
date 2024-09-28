@@ -1,12 +1,11 @@
 package leveretconey.gui;
 
 import leveretconey.dependencyDiscover.Parallel.RunParallel;
-import leveretconey.pre.transformer.Transformer;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 public class Discoverer extends JFrame{
     private JPanel contentPane;
@@ -24,6 +23,7 @@ public class Discoverer extends JFrame{
     private JCheckBox CSVCheckBox;
     private JCheckBox otherCheckBox;
     private JLabel ipLabel;
+    private JCheckBox nullCheckBox;
 
     Discoverer(){
        setContentPane(contentPane);
@@ -180,7 +180,9 @@ public class Discoverer extends JFrame{
         if(normalCheckBox.isSelected()){
             if(otherCheckBox.isSelected()){
                 RunParallel run = new RunParallel(inputF.getText(),outputF.getText());
-                run.runWithFullConvert(filteringCheckBox.isSelected(),true);
+                run.runWithFullConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
+                deleteFolderContentsOnly(new File("data/Stage 1"));
+                deleteFolderContentsOnly(new File("data/Stage 2"));
             }
 
         } else if(parallelCheckBox.isSelected()){
@@ -188,6 +190,20 @@ public class Discoverer extends JFrame{
         } else if(distributedCheckBox.isSelected()){
 
         }
+    }
+
+    public static boolean deleteFolderContentsOnly(File folder) {
+        if (folder.isDirectory()) {
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (!deleteFolderContentsOnly(file)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return folder.isDirectory() || folder.delete();
     }
 
 
