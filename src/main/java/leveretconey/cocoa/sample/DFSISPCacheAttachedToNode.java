@@ -15,6 +15,7 @@ public class DFSISPCacheAttachedToNode {
     private List<Pair<ALODTreeNode,ImprovedTwoSideSortedPartition>> ispCache
             =new ArrayList<>();
     private TwoSideDFSSPCache spCache;
+    public boolean dontUseNull;
 
 
     public DFSISPCacheAttachedToNode(TwoSideDFSSPCache spCache) {
@@ -48,10 +49,11 @@ public class DFSISPCacheAttachedToNode {
                 break;
             }
         }
+        isp.dontUseNull = dontUseNull;
         return isp;
     }
 
-    public void updateWorkingNode(ALODTreeNode node){
+    public  void updateWorkingNode(ALODTreeNode node){
         if (ispCache.isEmpty()){
             ispCache.add(new Pair<>(node,null));
             return;
