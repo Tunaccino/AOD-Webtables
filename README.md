@@ -27,6 +27,13 @@ And Change the Run Options to
 
 ![App Screenshot](src/main/resources/Settings-Gradle.png)
 
+Create two empty Folders Stage 1 and Stage 2 in
+
+```bash
+  data/Stage 1
+  data/Stage 2
+```
+
 Run the GUI
 
 ```bash
