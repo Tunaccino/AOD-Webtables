@@ -5,6 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,7 +36,7 @@ public class TransHTML implements Trans{
 
 
         Element table = doc.select("table").first();
-        String name = Path.of(data.substring(data.lastIndexOf("/"), data.lastIndexOf("."))).toString();
+        String name = Path.of(data.substring(data.lastIndexOf(File.separator), data.lastIndexOf("."))).toString();
 
         if (table == null) {
             System.out.println("HTML-File" + name + " is empty.");

@@ -6,6 +6,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -69,7 +70,7 @@ public class TransXML implements Trans {
                 }
             }
 
-            try (FileWriter writer = new FileWriter(Path.of("data/Stage 1" + data.substring(data.lastIndexOf("/"), data.lastIndexOf(".")) + ".csv").toString())) {
+            try (FileWriter writer = new FileWriter(Path.of("data/Stage 1" + data.substring(data.lastIndexOf(File.separator), data.lastIndexOf(".")) + ".csv").toString())) {
                 StringBuilder headerBuilder = new StringBuilder();
                 for (String columnName : allColumnNames) {
                     headerBuilder.append("\"").append(columnName).append("\",");

@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -37,7 +34,7 @@ public class TransJSON implements Trans{
 
         reader.close();
 
-        String name = Path.of(data.substring(data.lastIndexOf("/"), data.lastIndexOf("."))).toString();
+        String name = Path.of(data.substring(data.lastIndexOf(File.separator), data.lastIndexOf("."))).toString();
 
         if (jsonContent.length() == 0)
             throw new InvalidPropertiesFormatException("Json-Datei " + name + " ist leer.");
