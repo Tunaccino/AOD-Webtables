@@ -3,10 +3,13 @@ package leveretconey.exp.exp8;
 import leveretconey.cocoa.multipleStandard.DFSDiscovererWithMultipleStandard;
 import leveretconey.dependencyDiscover.Data.DataFormatConverter;
 import leveretconey.dependencyDiscover.Data.DataFrame;
+import leveretconey.dependencyDiscover.Dependency.LexicographicalOrderDependency;
 import leveretconey.dependencyDiscover.Parallel.RunParallel;
 import leveretconey.dependencyDiscover.Parallel.distributed.Client.AODClient;
 
 import org.apache.commons.lang3.time.StopWatch;
+
+import java.util.Collection;
 
 import static leveretconey.cocoa.multipleStandard.DFSDiscovererWithMultipleStandard.ValidatorType.G1;
 
@@ -33,26 +36,31 @@ public class AODWebtables {
 
          //Normal without null
          StopWatch stopWatchNormalNoNull = new StopWatch();
+         stopWatchNormalNoNull.start();
          for(int i = 0; i < 10; i++){
              run =  new RunParallel("data/Stage 2","data/Stage 3");
              run.runTesting(true);
          }
-         aodsFoundWithoutNull = run.testing.size();
          stopWatchNormalNoNull.stop();
          TnormalNoNull = stopWatchNormalNoNull.getTime();
+         for (Collection<LexicographicalOrderDependency> lods : run.testing)
+             aodsFoundWithoutNull += lods.size();
 
          //Normal with null
          StopWatch stopWatchNormalNull = new StopWatch();
+         stopWatchNormalNull.start();
          for(int i = 0; i < 10; i++){
              run =  new RunParallel("data/Stage 2","data/Stage 3");
              run.runTesting(false);
          }
-         aodsFoundWithNull = run.testing.size();
          stopWatchNormalNull.stop();
          TnormalNull = stopWatchNormalNull.getTime();
+         for (Collection<LexicographicalOrderDependency> lods : run.testing)
+             aodsFoundWithNull += lods.size();
 
          //Parallel without null
          StopWatch stopWatchParallelNoNull = new StopWatch();
+         stopWatchParallelNoNull.start();
          for(int i = 0; i < 10; i++){
              run =  new RunParallel("data/Stage 2","data/Stage 3");
              run.runParallelTesting(true);
@@ -62,6 +70,7 @@ public class AODWebtables {
 
          //Parallel with null
          StopWatch stopWatchParallelNull = new StopWatch();
+         stopWatchParallelNull.start();
          for(int i = 0; i < 10; i++){
              run =  new RunParallel("data/Stage 2","data/Stage 3");
              run.runParallelTesting(false);
@@ -71,6 +80,7 @@ public class AODWebtables {
 
          //Distributed
          StopWatch stopWatchDistributed = new StopWatch();
+         stopWatchDistributed.start();
          for(int i = 0; i < 10; i++){
              AODClient client = new AODClient();
              client.run("192.168.178.25","data/Stage 2","data/Stage 3",true);
