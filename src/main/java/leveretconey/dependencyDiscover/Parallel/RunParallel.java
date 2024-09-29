@@ -162,7 +162,7 @@ public class RunParallel {
             DataFrame data = DataFrame.fromCsv(outputPath);
             DFSDiscovererWithMultipleStandard discoverer = new DFSDiscovererWithMultipleStandard(G1, 0.01);
             discoverer.dontUseNull = dontUseNull;
-            collections.add(new Pair<>(discoverer.discover(data,0.01),outputPath));
+            collections.add(new Pair<>(discoverer.discover(data,0.01),output + raw));
         }
     }
 
@@ -393,7 +393,7 @@ public class RunParallel {
         }
     }
 
-    public void runParallelTesting() {
+    public void runParallelTesting(Boolean dontUseNull) {
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         try {
@@ -404,6 +404,7 @@ public class RunParallel {
                 Future<Void> future = executor.submit(() -> {
                     DataFrame data = DataFrame.fromCsv(stPath);
                     DFSDiscovererWithMultipleStandard discoverer = new DFSDiscovererWithMultipleStandard(G1,0.01);
+                    discoverer.dontUseNull = dontUseNull;
                     testing.add(discoverer.discover(data, 0.01));
 
                     return null;
@@ -425,14 +426,19 @@ public class RunParallel {
             discovererThreadLocal.remove();
         }
     }
-    public void runTesting(){
+    public void runTesting(Boolean dontUseNull){
         int index = 0;
         for (Path path : paths){
-            String stPath = path.toString();
-            System.out.println("TABLE: " + stPath);
-            DataFrame data = DataFrame.fromCsv(stPath);
-            DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
-            testing.add(discoverer.discover(data, 0.01));
+            try {
+                String stPath = path.toString();
+                System.out.println("TABLE: " + stPath);
+                DataFrame data = DataFrame.fromCsv(stPath);
+                DFSDiscovererWithMultipleStandard discoverer = new DFSDiscovererWithMultipleStandard(G1, 0.01);
+                discoverer.dontUseNull = dontUseNull;
+                testing.add(discoverer.discover(data, 0.01));
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
