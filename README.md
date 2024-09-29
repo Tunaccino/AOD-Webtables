@@ -24,10 +24,18 @@ Clone the project
 ```bash
   git clone https://github.com/Tunaccino/AOD-Webtables.git
 ```
+
 Go to
 
 ```bash
-  Settings|Build,Execution,Deplyoment|Build Tools|Gradle
+  File|ProjectStructure
+```
+And change the SDK to Java 21 and Language Level to 15. Then reload Gradle
+
+Go to
+
+```bash
+  File|Settings|Build,Execution,Deplyoment|Build Tools|Gradle
 ```
 And Change the Run Options to
 
