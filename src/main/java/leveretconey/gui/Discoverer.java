@@ -36,6 +36,7 @@ public class Discoverer extends JFrame{
        setVisible(true);
        inputF.setEditable(false);
        outputF.setEditable(false);
+       ipF.setEditable(false);
 
        normalCheckBox.addActionListener(new ActionListener() {
            @Override
@@ -93,6 +94,7 @@ public class Discoverer extends JFrame{
             public void itemStateChanged(ItemEvent e) {
                 inputF.setEditable(e.getStateChange() == ItemEvent.SELECTED);
                 outputF.setEditable(e.getStateChange() == ItemEvent.SELECTED);
+                ipF.setEditable(e.getStateChange() == ItemEvent.SELECTED);
             }
         });
 
