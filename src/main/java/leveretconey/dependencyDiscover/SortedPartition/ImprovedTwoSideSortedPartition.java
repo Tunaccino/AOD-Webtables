@@ -295,6 +295,15 @@ public class ImprovedTwoSideSortedPartition{
         return splitViolationCount;
     }
 
+    /**
+     * Takes two Sorted Partitions left and right and creates two subsets left' and right' where the entries in
+     * .index(Indexes of the former positioning of the tuple), .begins(Information where the different equivalence
+     * classes start) and .index2groupIndex that are affected by null tuples are updated.
+     * @param left A Sorted Partition where null tuples are supposed to be removed.
+     * @param right A Sorted Partition where null tuples are supposed to be removed.
+     * @return A list containing left',right' which are subsets of left and right respectively where the null values
+     * and any data affected is updated.
+     */
     private SortedPartition[] removeNull(SortedPartition left, SortedPartition right){
         SortedPartition[] partitions = new SortedPartition[2];
         ArrayList<Integer> removedIndex = new ArrayList<>();
@@ -368,7 +377,16 @@ public class ImprovedTwoSideSortedPartition{
         return partitions;
     }
 
-
+    /**
+     * Takes three Sorted Partitions left, right and upper, and creates three subsets left', right' and upper' where the entries in
+     * .index(Indexes of the former positioning of the tuple), .begins(Information where the different equivalence
+     * classes start) and .index2groupIndex that are affected by null tuples are updated.
+     * @param left A Sorted Partition where null tuples are supposed to be removed.
+     * @param right A Sorted Partition where null tuples are supposed to be removed.
+     * @param other A Sorted Partition where null tuples are supposed to be removed.
+     * @return A list containing left',right' which are subsets of left and right respectively where the null values
+     * and any data affected is updated.
+     */
     private SortedPartition[] removeNullWithParent(SortedPartition left, SortedPartition right, SortedPartition other){
         SortedPartition[] partitions = new SortedPartition[3];
         ArrayList<Integer> removedIndex = new ArrayList<>();

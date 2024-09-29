@@ -29,7 +29,16 @@ import java.nio.file.StandardOpenOption;
 import static leveretconey.cocoa.multipleStandard.DFSDiscovererWithMultipleStandard.ValidatorType.G1;
 
 /**
- * Adds the possibility to discover multiple Order Dependencies on a directory of Webtables in paralllel.
+ * Different run options for the discovery of AODs, where
+ *
+ * - just run means that the algorithm is run without any features.
+ * - parallel and remote mean that the algorithm is run in a parallel or distributed environment.
+ * - withConvert means that the .csv already exist but need to be formatted.
+ * - withFull Convert means that the type can either be .json,.xml,.csv or .html and still needs to be transformed into
+ * a .csv first.
+ * - testing simply means that the algorithms have a return value that then can be used for testing.
+ * - also a write option is introduced with @write Solution where a .txt is created and formatted and then alle the
+ * AODs found a written to that .txt which is placed in the desired output folder.
  */
 public class RunParallel {
 

@@ -3,6 +3,11 @@ package leveretconey.dependencyDiscover.SortedPartition;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * This class is used to create the .begins lists of the Sorted Partition (left,right,other).
+ * The begins lists contain the information where the different equivalence classes in a partition start.
+ * This class creates a subset of those original begins lists considering the null entries that were removed.
+ */
 public class NewDawn {
     public ArrayList<Integer> left;
     public ArrayList<Integer> right;
@@ -11,6 +16,20 @@ public class NewDawn {
     private int leftLower,leftUpper,rightLower,rightUpper,otherLower,otherUpper = 0;
 
 
+    /**
+     * All the calculations needed are performed right of the bat when a NewDawn is created.
+     * Therefore, different functions each representing a possible scenario are called.
+     *
+     * The different scenarios are :
+     * - Null values in the beginning of the list (@beginsLower)
+     * - Null values at the end of the list (@beginsUpper)
+     * Note that it is not possible that null values are in the "middle" for way the sorted Partitions are created.
+     *
+     * Each case is then further divided depending on how many values have to be removed(@leftLower,@leftUpper, @rightLower...).
+     * Within these Divisions the lists then get their final touches.
+     *
+     * @param partitions Said partitions where the begins lists need to be updated.
+     */
     public NewDawn(SortedPartition ... partitions) {
         this.left = new ArrayList<>(partitions[0].begins);
         this.right = new ArrayList<>(partitions[1].begins);
