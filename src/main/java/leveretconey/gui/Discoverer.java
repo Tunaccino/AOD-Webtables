@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutionException;
 
 public class Discoverer extends JFrame{
@@ -185,11 +186,11 @@ public class Discoverer extends JFrame{
         if(normalCheckBox.isSelected()){
             if(otherCheckBox.isSelected()){
                 run.runWithFullConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
-                deleteFolderContentsOnly(new File("data/Stage 1"));
-                deleteFolderContentsOnly(new File("data/Stage 2"));
+                deleteFolderContentsOnly(new File(Path.of("data/Stage 1").toString()));
+                deleteFolderContentsOnly(new File(Path.of("data/Stage 2").toString()));
             }else if(CSVCheckBox.isSelected()){
                 run.runWithConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
-                deleteFolderContentsOnly(new File("data/Stage 2"));
+                deleteFolderContentsOnly(new File(Path.of("data/Stage 2").toString()));
             }else {
                 run.run(!nullCheckBox.isSelected());
             }
@@ -197,11 +198,11 @@ public class Discoverer extends JFrame{
         } else if(parallelCheckBox.isSelected()){
             if(otherCheckBox.isSelected()){
                 run.runParallelWithFullConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
-                deleteFolderContentsOnly(new File("data/Stage 1"));
-                deleteFolderContentsOnly(new File("data/Stage 2"));
+                deleteFolderContentsOnly(new File(Path.of("data/Stage 1").toString()));
+                deleteFolderContentsOnly(new File(Path.of("data/Stage 2").toString()));
             }else if(CSVCheckBox.isSelected()){
                 run.runParallelWithConvert(filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
-                deleteFolderContentsOnly(new File("data/Stage 2"));
+                deleteFolderContentsOnly(new File(Path.of("data/Stage 2").toString()));
             }else {
                 run.runParallel(!nullCheckBox.isSelected());
             }
@@ -209,11 +210,11 @@ public class Discoverer extends JFrame{
             AODClient client = new AODClient();
             if(otherCheckBox.isSelected()){
                 client.runWithFullConvert(ipF.getText(),inputF.getText(),outputF.getText(),filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
-                deleteFolderContentsOnly(new File("data/Stage 1"));
-                deleteFolderContentsOnly(new File("data/Stage 2"));
+                deleteFolderContentsOnly(new File(Path.of("data/Stage 1").toString()));
+                deleteFolderContentsOnly(new File(Path.of("data/Stage 2").toString()));
             }else if(CSVCheckBox.isSelected()){
                 client.runConvert(ipF.getText(),inputF.getText(),outputF.getText(),filteringCheckBox.isSelected(),!nullCheckBox.isSelected());
-                deleteFolderContentsOnly(new File("data/Stage 2"));
+                deleteFolderContentsOnly(new File(Path.of("data/Stage 2").toString()));
             }else {
                 client.run(ipF.getText(),inputF.getText(),outputF.getText(),!nullCheckBox.isSelected());
             }
@@ -239,7 +240,7 @@ public class Discoverer extends JFrame{
 
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (Exception e) {
             e.printStackTrace();
         }

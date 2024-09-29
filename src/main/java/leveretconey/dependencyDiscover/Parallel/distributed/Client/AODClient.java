@@ -8,6 +8,7 @@ import leveretconey.dependencyDiscover.Parallel.distributed.Service.AODService;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.util.ArrayList;
@@ -70,8 +71,8 @@ public class AODClient {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }*/
-                String name = pair.getValue().substring(pair.getValue().lastIndexOf("/"));
-                run.writeSolution(pair.getKey(),output +"/" +name);
+                String name = Path.of(pair.getValue().substring(pair.getValue().lastIndexOf(File.separator))).toString();
+                run.writeSolution(pair.getKey(),Path.of(output +File.separator +name).toString());
             }
 
             System.out.println("Done calculating OD's!");
@@ -127,8 +128,8 @@ public class AODClient {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }*/
-                String name = pair.getValue().substring(pair.getValue().lastIndexOf("/"));
-                run.writeSolution(pair.getKey(),output +"/" +name);
+                String name = Path.of(pair.getValue().substring(pair.getValue().lastIndexOf(File.separator))).toString();
+                run.writeSolution(pair.getKey(),Path.of(output +File.separator +name).toString());
             }
 
             System.out.println("Done calculating OD's!");
@@ -190,8 +191,8 @@ public class AODClient {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }*/
-                String name = pair.getValue().substring(pair.getValue().lastIndexOf("/"));
-                run.writeSolution(pair.getKey(),output +"/" +name);
+                String name = Path.of(pair.getValue().substring(pair.getValue().lastIndexOf(File.separator))).toString();
+                run.writeSolution(pair.getKey(),Path.of(output + File.separator +name).toString());
             }
 
 

@@ -102,16 +102,16 @@ public class RunParallel {
     public void runWithConvert(Boolean filter, Boolean dontUseNull) throws IOException {
         for (Path path : paths){
             String stPath = path.toString();
-            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
+            String raw = Path.of(stPath.substring(stPath.lastIndexOf(File.separator), stPath.lastIndexOf(".")) + ".csv").toString();
             DataFormatConverter converter = new DataFormatConverter();
             converter.filter = filter;
             DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(path.toString());
-            config.outputPath = "data/Stage 2" + raw;
+            config.outputPath = Path.of("data/Stage 2" + raw).toString();
             converter.convert(config);
             DataFrame data = DataFrame.fromCsv(config.outputPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
             discoverer.dontUseNull = dontUseNull;
-            writeSolution(discoverer.discover(data, 0.01),output + raw);
+            writeSolution(discoverer.discover(data, 0.01),Path.of(output + raw).toString());
         }
     }
 
@@ -131,12 +131,12 @@ public class RunParallel {
     private void calculateStage2(Boolean filter){
         for (Path path : paths){
             String stPath = path.toString();
-            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
-            String updatedPath = "data/Stage 1" + raw;
+            String raw = Path.of(stPath.substring(stPath.lastIndexOf(File.separator), stPath.lastIndexOf(".")) + ".csv").toString();
+            String updatedPath = Path.of("data/Stage 1" + raw).toString();
             DataFormatConverter converter = new DataFormatConverter();
             converter.filter = filter;
             DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(updatedPath);
-            config.outputPath = "data/Stage 2" + raw;
+            config.outputPath = Path.of("data/Stage 2" + raw).toString();
             converter.convert(config);
         }
     }
@@ -144,21 +144,21 @@ public class RunParallel {
     private void calculateStage3(Boolean dontUseNull){
         for (Path path : paths){
             String stPath = path.toString();
-            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
-            String outputPath = "data/Stage 2" + raw;
+            String raw = Path.of(stPath.substring(stPath.lastIndexOf(File.separator), stPath.lastIndexOf(".")) + ".csv").toString();
+            String outputPath = Path.of("data/Stage 2" + raw).toString();
             DataFrame data = DataFrame.fromCsv(outputPath);
             DFSDiscovererWithMultipleStandard discoverer = new DFSDiscovererWithMultipleStandard(G1, 0.01);
             discoverer.dontUseNull = dontUseNull;
             var x = discoverer.discover(data, 0.01);
-            writeSolution(x, output + raw);
+            writeSolution(x, Path.of(output + raw).toString());
         }
     }
 
     private void calculateStage3Remote(Boolean dontUseNull){
         for (Path path : paths){
             String stPath = path.toString();
-            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
-            String outputPath = "data/Stage 2" + raw;
+            String raw = Path.of(stPath.substring(stPath.lastIndexOf(File.separator), stPath.lastIndexOf(".")) + ".csv").toString();
+            String outputPath = Path.of("data/Stage 2" + raw).toString();
             DataFrame data = DataFrame.fromCsv(outputPath);
             DFSDiscovererWithMultipleStandard discoverer = new DFSDiscovererWithMultipleStandard(G1, 0.01);
             discoverer.dontUseNull = dontUseNull;
@@ -177,8 +177,8 @@ public class RunParallel {
             DataFrame data = DataFrame.fromCsv(stPath);
             DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
             discoverer.dontUseNull = dontUseNull;
-            String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
-            writeSolution(discoverer.discover(data, 0.01),output + raw);
+            String raw = Path.of(stPath.substring(stPath.lastIndexOf(File.separator), stPath.lastIndexOf(".")) + ".csv").toString();
+            writeSolution(discoverer.discover(data, 0.01),Path.of(output + raw).toString());
         }
     }
 
@@ -222,16 +222,16 @@ public class RunParallel {
             for (Path path : paths) {
                 String stPath = path.toString();
                 Future<Void> future = executor.submit(() -> {
-                    String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
+                    String raw = Path.of(stPath.substring(stPath.lastIndexOf(File.separator), stPath.lastIndexOf(".")) + ".csv").toString();
                     DataFormatConverter converter = new DataFormatConverter();
                     converter.filter = filter;
                     DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(path.toString());
-                    config.outputPath = "data/Stage 2" + raw;
+                    config.outputPath = Path.of("data/Stage 2" + raw).toString();
                     converter.convert(config);
                     DataFrame data = DataFrame.fromCsv(config.outputPath);
                     DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
                     discoverer.dontUseNull = dontUseNull;
-                    writeSolution(discoverer.discover(data, 0.01),output + raw);
+                    writeSolution(discoverer.discover(data, 0.01),Path.of(output + raw).toString());
 
                     return null;
                 });
@@ -296,16 +296,16 @@ public class RunParallel {
             for (Path path : paths) {
                 String stPath = path.toString();
                 Future<Void> future = executor.submit(() -> {
-                    String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
+                    String raw = Path.of(stPath.substring(stPath.lastIndexOf(File.separator), stPath.lastIndexOf(".")) + ".csv").toString();
                     DataFormatConverter converter = new DataFormatConverter();
                     converter.filter = filter;
                     DataFormatConverter.DataFormatConverterConfig config = new DataFormatConverter.DataFormatConverterConfig(path.toString());
-                    config.outputPath = "data/Stage 2" + raw;
+                    config.outputPath = Path.of("data/Stage 2" + raw).toString();
                     converter.convert(config);
                     DataFrame data = DataFrame.fromCsv(config.outputPath);
                     DFSDiscovererWithMultipleStandard discoverer =new DFSDiscovererWithMultipleStandard(G1,0.01);
                     discoverer.dontUseNull = dontUseNull;
-                    collections.add(new Pair<>(discoverer.discover(data,0.01), config.outputPath));
+                    collections.add(new Pair<>(discoverer.discover(data,0.01), Path.of(config.outputPath).toString()));
 
                     return null;
                 });
@@ -371,8 +371,8 @@ public class RunParallel {
                     DFSDiscovererWithMultipleStandard discoverer = discovererThreadLocal.get();
                     discoverer.dontUseNull = dontUseNull;
                     var x = discoverer.discover(data, 0.01);
-                    String raw = stPath.substring(stPath.lastIndexOf("/"), stPath.lastIndexOf(".")) + ".csv";
-                    writeSolution(x, output + raw);
+                    String raw = Path.of(stPath.substring(stPath.lastIndexOf(File.separator), stPath.lastIndexOf(".")) + ".csv").toString();
+                    writeSolution(x, Path.of(output + raw).toString());
                     return null;
                 });
 
@@ -463,8 +463,8 @@ public class RunParallel {
     }*/
 
     public void writeSolution(Collection<LexicographicalOrderDependency> discoveredLods, String directory) {
-        String tableName = directory.substring(directory.lastIndexOf("/"));
-        directory = directory.substring(0,directory.lastIndexOf("/"));
+        String tableName = Path.of(directory.substring(directory.lastIndexOf(File.separator))).toString();
+        directory = Path.of(directory.substring(0,directory.lastIndexOf(File.separator))).toString();
 
         File dir = new File(directory);
         if (!dir.exists()) {
