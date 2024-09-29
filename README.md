@@ -86,7 +86,7 @@ It is important to first select a run method, e.g parallel.
 
 The project is build on Linux, and it is highly recommended to use Linux when using it.
 
-If you are using windows please use the Windows branch
+If you are using Windows please use the intended branch
 ```bash
 https://github.com/Tunaccino/AOD-Webtables/tree/windows
 ```
