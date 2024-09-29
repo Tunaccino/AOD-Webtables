@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -36,7 +37,7 @@ public class TransJSON implements Trans{
 
         reader.close();
 
-        String name = data.substring(data.lastIndexOf("/"), data.lastIndexOf("."));
+        String name = Path.of(data.substring(data.lastIndexOf("/"), data.lastIndexOf("."))).toString();
 
         if (jsonContent.length() == 0)
             throw new InvalidPropertiesFormatException("Json-Datei " + name + " ist leer.");
@@ -80,7 +81,7 @@ public class TransJSON implements Trans{
             sb.deleteCharAt(sb.length() - 1).append('\n');
         }
 
-        FileWriter writer = new FileWriter("data/Stage 1" + name + ".csv");
+        FileWriter writer = new FileWriter(Path.of("data/Stage 1" + name + ".csv").toString());
         writer.write(sb.toString());
         writer.flush();
         writer.close();

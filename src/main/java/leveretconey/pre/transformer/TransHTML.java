@@ -8,6 +8,7 @@ import org.jsoup.select.Elements;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +35,14 @@ public class TransHTML implements Trans{
 
 
         Element table = doc.select("table").first();
-        String name = data.substring(data.lastIndexOf("/"), data.lastIndexOf("."));
+        String name = Path.of(data.substring(data.lastIndexOf("/"), data.lastIndexOf("."))).toString();
 
         if (table == null) {
             System.out.println("HTML-File" + name + " is empty.");
             return;
         }
 
-        FileWriter writer = new FileWriter("data/Stage 1" + name + ".csv");
+        FileWriter writer = new FileWriter(Path.of("data/Stage 1" + name + ".csv").toString());
 
         List<Integer> columnCounts = new ArrayList<>();
         Elements rows = table.select("tr");
