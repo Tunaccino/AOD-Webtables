@@ -45,9 +45,20 @@ Run the GUI
   src/main/java/leveretconey/gui/Discoverer.java
 ```
 
+## Distribution
+To run the program using distribution run
 
+- On the service side 
+```bash
+  src/main/java/leveretconey/dependencyDiscover/Parallel/distributed/Service/AODServiceImplementation.java
+```
 
+- On the client side 
+```bash
+  src/main/java/leveretconey/dependencyDiscover/Parallel/distributed/Client/AODClient.java
+```
 
+- For the client side it is advised to use the GUI though
 
 ## Experiment
 The experiments shown in the Thesis can be reproduced using the code in
