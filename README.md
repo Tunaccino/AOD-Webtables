@@ -99,6 +99,13 @@ If you are using Windows please use the intended branch
 https://github.com/Tunaccino/AOD-Webtables/tree/windows
 ```
 
+#### Error message out of Cache
+The Cache size used can be reduced by lowering the value of maxSpCache in
+```bash
+src/main/java/leveretconey/cocoa/multipleStandard/DFSDiscovererWithMultipleStandard.java
+```
+Only do this if you run out of cache as it can lower the algorithm's performance!
+
 
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⠟⠻⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
